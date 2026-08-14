@@ -23,6 +23,13 @@ export type AnalyticsEvent =
   | "vsl_75"
   | "vsl_90"
   | "vsl_complete"
+  // --- Landing v1.0, sekcja M7. Każde raz na sesję; bez czasu oglądania i bez ID użytkownika. ---
+  | "vsl_visible"
+  | "vsl_play"
+  | "vsl_error"
+  | "vsl_replay"
+  | "page_view_landing"
+  | "cta_click"
   | "application_start"
   | "application_step_view"
   | "application_step_complete"

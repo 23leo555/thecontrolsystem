@@ -44,6 +44,23 @@ const config: Config = {
         destructive: "#f53b4b",
 
         border: "rgba(45, 51, 64, 0.55)",
+
+        /**
+         * Paleta briefu wdrożeniowego v1.0, sekcja AF2 — obowiązuje na landingu `/`.
+         * Celowo dodana OBOK tokenów powyżej, a nie zamiast nich: `/reset` i
+         * `/aplikacja` zostają na indygo, landing przechodzi na złoto.
+         */
+        "tcs-bg": "#05080C", // bg-950, główne tło
+        "tcs-bg-alt": "#0A1016", // bg-900, sekcje naprzemienne
+        "tcs-surface": "#101820", // surface-800, karty
+        "tcs-border": "#263440", // border-700
+        "tcs-text": "#F4F6F8", // text-50
+        "tcs-text-muted": "#A8B3BD", // text-300
+        "tcs-gold": "#C9A96E", // accent-gold, CTA
+        "tcs-gold-hover": "#D6BC88",
+        "tcs-blue": "#8EDBFF", // focus
+        "tcs-success": "#83C7A5",
+        "tcs-error": "#F29A9A",
       },
       fontFamily: {
         sans: ["var(--font-manrope)", "ui-sans-serif", "system-ui", "sans-serif"],

@@ -1,44 +1,30 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ButtonLink } from "@/components/ui/Button";
-import { track } from "@/lib/analytics";
 import { site } from "@/lib/site";
-import { Logo } from "@/components/ui/Logo";
 
-/** Header — logo po lewej, jedno CTA po prawej, sticky po pierwszym scrollu. Sekcja 6. */
+/**
+ * Header landingu — celowo BEZ nawigacji (sekcja AF5).
+ * Strona ma jedną decyzję, więc nagłówek nie może oferować alternatyw.
+ * Nie ma tu również CTA: pierwsze pojawia się dopiero po VSL (sekcja A2).
+ */
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <header
-      className={`sticky top-0 z-40 transition-colors duration-150 ${
-        scrolled ? "border-b border-border bg-background/85 backdrop-blur" : "bg-transparent"
-      }`}
-    >
-      <div className="tcs-container flex h-16 items-center justify-between gap-4">
-        <Link href={site.routes.system} aria-label={site.brand} className="min-w-0">
-          <Logo compactOnMobile />
-        </Link>
-        <ButtonLink
-          href={site.routes.reset}
-          variant="primary"
-          size="md"
-          className="shrink-0 whitespace-nowrap px-3 text-xs sm:px-5 sm:text-sm"
-          onClick={() => track("cta_reset_click", { location: "header" })}
+    <header className="relative z-20 border-b border-tcs-border/60">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center px-4 sm:h-20 sm:px-8">
+        <Link
+          href={site.routes.home}
+          className="flex items-center gap-3 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tcs-blue focus-visible:ring-offset-2 focus-visible:ring-offset-tcs-bg"
         >
-          {/* Krótszy wariant na wąskich ekranach — pełny label nie mieści się przy 320px. */}
-          <span className="hidden min-[400px]:inline">{site.cta.protocolShort}</span>
-          <span className="min-[400px]:hidden">{site.cta.protocolCompact}</span>
-        </ButtonLink>
+          <img
+            src="/brand/tcs-logo.webp"
+            alt=""
+            width={36}
+            height={36}
+            className="h-8 w-8 sm:h-9 sm:w-9"
+          />
+          <span className="text-[13px] font-bold tracking-[0.16em] text-tcs-text sm:text-sm">
+            THE CONTROL SYSTEM
+          </span>
+        </Link>
       </div>
     </header>
   );

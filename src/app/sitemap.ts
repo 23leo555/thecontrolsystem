@@ -1,21 +1,30 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/lib/site";
 
+/**
+ * Sitemap wg sekcji AL1: obejmuje "/" i wymagane strony prawne.
+ *
+ * Lejek aplikacji jest świadomie POMINIĘTY — /apply i /apply/result/* mają
+ * noindex, nofollow i nie mogą występować w mapie. To samo dotyczy /admin.
+ *
+ * /reset zostaje w mapie, bo lejek protokołu nadal działa i przyjmuje ruch
+ * z zewnątrz, mimo że nowy landing go nie promuje.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const paths = [
-    site.routes.system,
-    site.routes.reset,
-    site.routes.application,
-    site.routes.privacy,
-    site.routes.cookies,
-    site.routes.terms,
+
+  const entries: { path: string; priority: number }[] = [
+    { path: site.routes.home, priority: 1 },
+    { path: site.routes.reset, priority: 0.8 },
+    { path: site.routes.privacy, priority: 0.4 },
+    { path: site.routes.cookies, priority: 0.4 },
+    { path: site.routes.terms, priority: 0.4 },
   ];
-  return paths.map((p) => ({
-    url: `${site.url}${p}`,
+
+  return entries.map(({ path, priority }) => ({
+    url: `${site.url}${path}`,
     lastModified: now,
     changeFrequency: "monthly",
-    // /reset jest głównym celem ruchu z Instagrama — traktujemy na równi z /system.
-    priority: p === site.routes.system || p === site.routes.reset ? 1 : 0.6,
+    priority,
   }));
 }

@@ -7,8 +7,14 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Wejście główne "/" → 308 na /system (sekcja 4 briefu).
-      { source: "/", destination: "/system", permanent: true },
+      // Brief v1.0 (sekcja I1): landing stoi pod "/". Stary adres /system
+      // przekierowujemy, żeby nie zgubić linków do poprzedniej wersji strony.
+      { source: "/system", destination: "/", permanent: true },
+
+      // TYMCZASOWE: brief wymaga /apply, ale lejek aplikacji jest wciąż pod
+      // /aplikacja (przebudowa wg sekcji T-AA to osobny etap). Redirect zachowuje
+      // query, więc cta_placement i UTM-y nie giną. Usunąć po przeniesieniu trasy.
+      { source: "/apply", destination: "/aplikacja", permanent: false },
     ];
   },
 };

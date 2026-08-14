@@ -29,7 +29,8 @@ export const metadata: Metadata = {
     "Prywatny mentoring premium dla mężczyzn działających na wysokim poziomie zawodowym. W 90 dni odzyskaj kontrolę nad sylwetką, energią i codziennym funkcjonowaniem.",
   applicationName: site.name,
   authors: [{ name: site.author }],
-  alternates: { canonical: site.routes.system },
+  // Domyślny canonical; każda strona nadpisuje go własnym (landing → "/", AL1).
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "pl_PL",

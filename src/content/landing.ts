@@ -1,156 +1,161 @@
 /**
- * TREŚĆ landing page /system — sekcja 6 briefu.
- * To jedyne miejsce do edycji copy. Kolejność sekcji NIE zmieniać bez zgody właściciela.
- * Placeholdery (VSL, case studies, zdjęcia) opisane flagą `placeholder: true`.
+ * Treść landing page — finalne copy z „FINALNY BRIEF WDROŻENIOWY v1.0" (14.08.2026).
+ *
+ * ŹRÓDŁO PRAWDY. Copy jest zamrożone (sekcja A2 briefu) i nie wolno go zmieniać
+ * bez zgody właściciela. Numery sekcji przy każdym bloku odsyłają do briefu.
+ *
+ * Świadome pominięcia:
+ * - brak zakresów „6-12 kg / 6-20 cm w 90 dni" (K, decyzja claimowa + AN3),
+ * - brak przycisku do aplikacji w Hero (A2),
+ * - brak ceny, FAQ, newslettera, sociali i lead magnetu (A2).
  */
 
+/** Jedyny wariant CTA na całej stronie (sekcja O1). */
+export const CTA_LABEL = "ZRÓB PIERWSZY KROK I ODZYSKAJ KONTROLĘ";
+
+/** Sekcja K — Hero. */
 export const hero = {
-  h1: "W CIĄGU 90 DNI ODZYSKAJ KONTROLĘ NAD CIAŁEM, ENERGIĄ I CODZIENNYM ŻYCIEM",
-  subheadline:
-    "Zbuduj sylwetkę i sposób funkcjonowania, które wreszcie odpowiadają poziomowi, na jakim działasz zawodowo.",
-  note: "Prywatny mentoring premium. Nie program dla każdego — system selekcji.",
-};
+  eyebrow: "DLA ZAPRACOWANYCH MĘŻCZYZN 30+, KTÓRZY FUNKCJONUJĄ ZAWODOWO NA WYSOKIM POZIOMIE",
+  headline:
+    "Zredukuj brzuch, zmniejsz talię i odzyskaj energię w ciągu pierwszych 90 dni — bez podporządkowywania życia kolejnej diecie i planowi treningowemu.",
+  supporting:
+    "The Control System to indywidualny proces 1 na 1, który łączy biologię, zachowanie i realne warunki Twojego życia w jeden system. Nie dopasowujemy Twojego życia do planu. Dopasowujemy system do Twojego życia.",
+  riskReversal: {
+    badge: "CONTROL RESET 90",
+    body: "Wspólnie ustalamy konkretny, mierzalny i realistyczny rezultat na pierwsze 90 dni. Jeśli realizujesz proces, raportujesz i wdrażasz uzgodnione działania, a mimo to go nie osiągniemy — otrzymujesz zwrot 100% inwestycji zgodnie z warunkami gwarancji.",
+  },
+  nextStep: "KROK 1 · OBEJRZYJ MATERIAŁ 4:43",
+} as const;
 
-export const problem = {
-  eyebrow: "Problem",
-  title: "Wysoki poziom zawodowy nie gwarantuje kontroli nad energią i ciałem",
-  body: [
-    "Zarządzasz zespołami, projektami i decyzjami wartymi setki tysięcy złotych. A mimo to najmniej kontroli masz nad tym, co najważniejsze: własnym ciałem, snem i energią.",
-    "Kolejne zrywy, dieta „od poniedziałku”, plan skopiowany od kogoś, kto nie żyje Twoim tempem. Efekt utrzymuje się kilka tygodni i rozpada w pierwszym intensywnym okresie.",
-    "Problem nie leży w dyscyplinie. Leży w braku systemu dopasowanego do realiów Twojego życia.",
+/** Sekcja L — Krok 1 / VSL. */
+export const step1 = {
+  eyebrow: "KROK 1 · 4 MINUTY 43 SEKUNDY",
+  headline:
+    "Zobacz, dlaczego kolejna dieta albo plan treningowy prawdopodobnie nie rozwiążą Twojego problemu.",
+  supporting:
+    "Włącz materiał i sprawdź, jak The Control System łączy Biologię, Zachowanie, Środowisko i System w proces, który działa również wtedy, kiedy tydzień nie wygląda idealnie.",
+  microcopy: "Z dźwiękiem · Polskie napisy · Bez autoplay",
+} as const;
+
+/** Sekcja N — Krok 2 / aplikacja. */
+export const step2 = {
+  eyebrow: "KROK 2",
+  headline: "Jeśli rozpoznajesz siebie w tym materiale, zrób pierwszy krok.",
+  supporting:
+    "Wypełnij krótką aplikację kwalifikacyjną. Sprawdzimy, czy The Control System 1 na 1 może zostać dopasowany do Twojej sytuacji, celu i realnych warunków życia.",
+  microcopy:
+    "Krótka aplikacja kwalifikacyjna. Jeśli zobaczymy dopasowanie, otrzymasz możliwość wyboru terminu rozmowy online 1 na 1 z Krystianem. Nie każdy kandydat przechodzi do etapu rozmowy.",
+} as const;
+
+/** Sekcje P + Q — nagłówek bloku Dowód. */
+export const proof = {
+  eyebrow: "DOWÓD DZIAŁANIA W PRAWDZIWYM ŻYCIU",
+  headline: "System ma działać wtedy, kiedy życie nie wygląda idealnie.",
+  supporting:
+    "Dwa różne punkty startowe. Ten sam mechanizm: zobaczyć rzeczywistość, uporządkować system, utrzymać działanie i dopiero wtedy skalować progres.",
+  /** Wspólne microcopy pod metrykami (P1 i Q1 — identyczne brzmienie). */
+  metricsNote:
+    "Rezultat indywidualny. Dane liczbowe pochodzą z dostarczonego dokumentu case study.",
+} as const;
+
+export interface CaseStudy {
+  slug: string;
+  eyebrow: string;
+  headline: string;
+  transformation: string;
+  metrics: { value: string; label: string }[];
+  start: string;
+  obstacle: string;
+  mechanism: string;
+  outcome: string;
+  image: {
+    base: string;
+    widths: number[];
+    /** Wymiary własne — konieczne, żeby lazy-loading nie powodował skoku layoutu (AH). */
+    intrinsic: { w: number; h: number };
+    alt: string;
+    caption: string;
+  };
+}
+
+/** Sekcja P — case study 01. */
+export const boleslaw: CaseStudy = {
+  slug: "boleslaw",
+  eyebrow: "CASE STUDY 01 · BOLESŁAW",
+  headline:
+    "Nie potrzebował więcej dyscypliny. Potrzebował systemu, który wytrzyma jego prawdziwe życie.",
+  transformation:
+    "Od pracy nawet 7 dni w tygodniu po około 12 godzin dziennie i chaosu całego trybu życia — do regularnego procesu, większej energii i widocznej transformacji sylwetki.",
+  metrics: [
+    { value: "−10 kg", label: "masy ciała" },
+    { value: "−19 cm", label: "w talii" },
+    { value: "+2,5 kg", label: "masy mięśniowej" },
+    { value: "12 mies.", label: "współpracy" },
   ],
+  start:
+    "Bolesław jest fryzjerem i prowadzi własny salon. Przeciążenie pracą, niedobór snu, niska energia, mgła poznawcza i brak regularności sprawiały, że kolejny plan tylko dokładał obowiązków.",
+  obstacle:
+    "Problemem nie był brak wiedzy. Problemem był chaos całego systemu funkcjonowania.",
+  mechanism:
+    "Najpierw ustabilizowaliśmy podstawy: rytm dnia, regenerację i warunki do regularnego działania. Dopiero na tej bazie rozpoczął się progres sylwetkowy.",
+  // „deklarował" jest wymagane przez P2 — nie przedstawiamy tego jako efektu medycznego.
+  outcome:
+    "Bolesław deklarował większą energię, pewność siebie, lepszą prezencję i bardziej zdecydowany sposób funkcjonowania. Transformacja była zauważalna również dla ludzi wokół niego.",
+  image: {
+    base: "/cases/boleslaw",
+    widths: [400, 600, 800, 1200],
+    intrinsic: { w: 1320, h: 2346 },
+    alt: "Bolesław przed rozpoczęciem współpracy i po niej — zestawienie sylwetki",
+    caption: "Zestawienie sylwetki Bolesława przed i po współpracy · materiał źródłowy",
+  },
 };
 
-export const result90 = {
-  eyebrow: "Rezultat po 90 dniach",
-  title: "Jak wygląda odzyskana kontrola",
-  disclaimer:
-    "Efekty zależą od punktu startu i konsekwencji wdrożenia. To nie jest obietnica gwarantowana dla każdego.",
-  items: [
-    { label: "Sylwetka", text: "Widoczna zmiana kompozycji ciała i realnie węższy pas." },
-    { label: "Energia", text: "Stabilna energia w ciągu dnia, bez zjazdów po południu." },
-    { label: "Sen", text: "Głębszy sen i regeneracja, która nadąża za Twoim obciążeniem." },
-    { label: "Funkcjonowanie", text: "Powtarzalny system, który działa nawet w gorszym tygodniu." },
+/** Sekcja Q — case study 02. */
+export const oskar: CaseStudy = {
+  slug: "oskar",
+  eyebrow: "CASE STUDY 02 · OSKAR",
+  headline: "System nie kończył się wtedy, kiedy zaczynał się kolejny wyjazd.",
+  transformation:
+    "Przy częstych wyjazdach trwających nawet 2–3 tygodnie i bez stałego dostępu do siłowni Oskar zbudował proces, który zmieniał formę — ale nie przestawał działać.",
+  metrics: [
+    { value: "−16 kg", label: "masy ciała" },
+    { value: "−24 cm", label: "w talii" },
+    { value: "+1,5 kg", label: "masy mięśniowej" },
+    { value: "6 mies.", label: "współpracy" },
   ],
+  start:
+    "Oskar pracuje w branży kolejowej i często funkcjonuje poza standardowym środowiskiem. Długie wyjazdy, stres i ograniczony dostęp do siłowni rozbijały klasyczne plany.",
+  obstacle:
+    "Plan oparty na idealnym tygodniu przestawał działać po zmianie miejsca i rytmu dnia.",
+  mechanism:
+    "W standardowych warunkach Oskar realizował właściwy plan treningowy. W wyjazdach system przechodził na rozwiązania możliwe w aktualnym środowisku, w tym trening z masą własnego ciała. Zmieniał się plan wykonania, nie kierunek procesu.",
+  outcome:
+    "Oskar deklarował poprawę energii, samopoczucia, pewności siebie i codziennego funkcjonowania oraz większe poczucie kontroli.",
+  image: {
+    // Źródło miało rozszerzenie .png przy zawartości JPEG — naprawione przy konwersji (AN2).
+    base: "/cases/oskar",
+    widths: [400, 600, 800],
+    intrinsic: { w: 864, h: 1536 },
+    alt: "Oskar przed rozpoczęciem współpracy i po niej — zestawienie sylwetki",
+    caption: "Zestawienie sylwetki Oskara przed i po współpracy · materiał źródłowy",
+  },
 };
 
-export const vsl = {
-  eyebrow: "Zobacz, jak to działa",
-  title: "Nagranie od Krystiana",
-  placeholder: true,
-  note: "Materiał wideo (VSL) zostanie podmieniony bez zmian w kodzie po jego dostarczeniu.",
-};
-
-export const whyFail = {
-  eyebrow: "Dlaczego wcześniejsze próby się rozpadają",
-  title: "Plan nie był dopasowany do realnego życia",
-  reasons: [
-    {
-      title: "Plan z internetu, nie z Twojej sytuacji",
-      text: "Gotowe programy nie znają Twojego kalendarza, stresu decyzyjnego ani rytmu podróży.",
-    },
-    {
-      title: "Wszystko naraz, więc nic na stałe",
-      text: "Rewolucja zamiast systemu. Motywacja się kończy, a nawyki nie zdążyły się utrwalić.",
-    },
-    {
-      title: "Zero pomiaru i korekty",
-      text: "Bez danych i iteracji nie wiadomo, co działa. Zostaje domysł i frustracja.",
-    },
-  ],
-};
-
-export const model = {
-  eyebrow: "Metoda",
-  title: "Model Integracji Biologiczno-Behawioralnej",
-  intro: "Cztery warstwy, które muszą działać razem, żeby zmiana była trwała.",
-  pillars: [
-    { name: "Biologia", text: "Sen, hormony, regeneracja, żywienie i realna zdolność do wysiłku." },
-    { name: "Zachowanie", text: "Decyzje, nawyki i mechanizmy, które prowadzą albo sabotują wynik." },
-    { name: "Środowisko", text: "Praca, podróże, dom i ludzie — kontekst, w którym system musi przetrwać." },
-    { name: "System", text: "Spinająca warstwa: pomiar, iteracja i zasady, które utrzymują kontrolę." },
-  ],
-};
-
-export const process = {
-  eyebrow: "Proces",
-  title: "Jak wygląda 90 dni",
-  steps: [
-    { n: "01", name: "Diagnoza", text: "Pełne rozpoznanie sytuacji, danych i ograniczeń Twojego życia." },
-    { n: "02", name: "System", text: "Budujemy indywidualny system dopasowany do Twojego tempa." },
-    { n: "03", name: "Iteracja", text: "Regularny pomiar i korekta — usuwamy to, co nie działa." },
-    { n: "04", name: "Utrwalenie", text: "Zmiana staje się domyślnym sposobem funkcjonowania." },
-  ],
-};
-
-export const caseStudies = {
-  eyebrow: "Historie",
-  title: "Efekty realnych klientów",
-  placeholder: true,
-  note: "Case studies (Bolek, Oskar), pomiary i zdjęcia metamorfoz zostaną wstawione po dostarczeniu. Bez stocków i danych zastępczych.",
-  people: [
-    { name: "Bolek", summary: "Case study w przygotowaniu." },
-    { name: "Oskar", summary: "Case study i pomiary w przygotowaniu." },
-  ],
-};
-
-export const author = {
-  eyebrow: "O autorze",
-  title: "Krystian Ćwik",
-  placeholderPhoto: true,
-  body: [
-    "Twórca metody i systemu The Control System. Pracuje wyłącznie z wąską grupą mężczyzn działających na wysokim poziomie zawodowym.",
-    "Podejście oparte na precyzji, danych i pełnej kontroli procesu — nie na motywacyjnych hasłach.",
-  ],
-};
-
-export const guarantee = {
-  eyebrow: "Gwarancja",
-  title: "Uczciwy mechanizm, bez przesadnych obietnic",
-  body: "Zobowiązujemy się do jakości procesu i pełnego zaangażowania w Twój wynik. Warunki gwarancji zostaną doprecyzowane w dokumentach — bez roszczeń, których nie da się dotrzymać.",
-  placeholder: true,
-};
-
-export const faq = {
-  eyebrow: "FAQ",
-  title: "Najczęstsze pytania",
-  items: [
-    {
-      q: "Ile to kosztuje?",
-      a: "The Control System to prywatny mentoring premium. Konkretną inwestycję omawiamy dopiero po kwalifikacji, gdy wiemy, że jest realne dopasowanie.",
-    },
-    {
-      q: "Dlaczego jest kwalifikacja?",
-      a: "Pracujemy z wąską grupą. Krótka aplikacja pozwala sprawdzić, czy program jest właściwym kolejnym krokiem dla Ciebie — zanim porozmawiamy.",
-    },
-    {
-      q: "Ile czasu to zajmuje w tygodniu?",
-      a: "System projektujemy pod Twój realny kalendarz, także w intensywnych okresach. Chodzi o powtarzalność, nie o maksymalny wysiłek.",
-    },
-    {
-      q: "Czy to program treningowy czy dietetyczny?",
-      a: "To kompletny system: biologia, zachowanie, środowisko i warstwa spinająca. Trening i żywienie są jego częścią, nie całością.",
-    },
-    {
-      q: "Czy muszę robić badania?",
-      a: "W uzasadnionych przypadkach opieramy decyzje na danych. Zakres ustalamy indywidualnie na etapie diagnozy.",
-    },
-    {
-      q: "Czy dostanę gwarancję efektu?",
-      a: "Gwarantujemy jakość procesu i zaangażowanie. Rezultat zależy też od Twojej konsekwencji — dlatego nie obiecujemy efektów „dla każdego”.",
-    },
-  ],
-};
-
+/** Sekcja R — finalne CTA po case studies. */
 export const finalCta = {
-  eyebrow: "Następny krok",
-  title: "Zacznij od odzyskania kontroli",
-  body: "Odbierz 7-dniowy Protokół Resetu albo od razu sprawdź, czy The Control System jest dla Ciebie.",
-};
+  eyebrow: "TWÓJ PIERWSZY KROK",
+  headline: "Przestań odkładać siebie na kolejny kwartał.",
+  supporting:
+    "Jeśli chcesz potraktować swoje ciało, energię i sposób funkcjonowania z taką samą powagą jak biznes, rozpocznij kwalifikację do The Control System 1 na 1.",
+  microcopy:
+    "Krótka aplikacja kwalifikacyjna. Jeśli zobaczymy dopasowanie, przejdziesz do wyboru terminu rozmowy online 1 na 1. Samo wypełnienie aplikacji nie gwarantuje rozmowy ani przyjęcia do programu.",
+} as const;
 
+/** Sekcja S — footer. Oba disclaimery: DO FINALNEJ WERYFIKACJI PRAWNEJ. */
 export const footer = {
-  tagline: "Prywatny system zarządzania wynikami. Nie landing trenera personalnego.",
-  copyright: `© ${new Date().getFullYear()} The Control System by Krystian Ćwik. Wszelkie prawa zastrzeżone.`,
-  legalNote:
-    "Treści mają charakter edukacyjny i nie stanowią diagnozy ani leczenia. Wyniki bywają indywidualne.",
-};
+  role: "Krystian Ćwik · Twórca The Control System",
+  resultsDisclaimer:
+    "Rezultaty są indywidualne i zależą między innymi od punktu startowego, stanu zdrowia oraz realizacji uzgodnionego procesu. Przedstawione case studies nie stanowią gwarancji identycznego wyniku.",
+  healthDisclaimer:
+    "Treści na stronie mają charakter informacyjny i nie stanowią diagnozy, porady medycznej ani zastępstwa konsultacji z lekarzem.",
+} as const;

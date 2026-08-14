@@ -32,8 +32,35 @@ export const site = {
    */
   systemPageLive: process.env.NEXT_PUBLIC_SYSTEM_PAGE_LIVE === "true",
 
+  /**
+   * VSL (brief sekcja M3). Master 311 MB nie trafia do repo ani do deployu —
+   * na Vercel Blob leży wersja 720p/28,8 MB, mieszcząca się w budżecie <=30 MB.
+   * Poster jest statyczny, więc pierwszy render nie czeka na sieć.
+   */
+  vsl: {
+    src:
+      process.env.NEXT_PUBLIC_VSL_URL ??
+      "https://vrbicbwiimyu2c2q.public.blob.vercel-storage.com/vsl/the-control-system-vsl-720p.mp4",
+    poster: "/vsl/poster",
+    /** Napisy pl.vtt — bloker P0 (AN1). Player pokazuje track dopiero, gdy plik istnieje. */
+    captions: process.env.NEXT_PUBLIC_VSL_CAPTIONS ?? null,
+    durationLabel: "4:43",
+    durationSeconds: 283,
+  },
+
   routes: {
-    system: "/system",
+    /** Landing wg briefu v1.0 stoi pod „/". `/system` przekierowuje tu 308. */
+    home: "/",
+    apply: "/apply",
+    legal: "/legal",
+    controlReset90: "/control-reset-90",
+
+    /**
+     * Alias historyczny. Landing przeniósł się spod /system na "/" (brief I1),
+     * więc wszystkie stare linki wewnętrzne prowadzą teraz wprost do korzenia
+     * i nie przechodzą przez redirect.
+     */
+    system: "/",
     reset: "/reset",
     resetThanks: "/reset/dziekuje",
     application: "/aplikacja",
