@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Design tokeny — spójne z aplikacją Lovable (Control System Elite) ===
+   Paleta „Midnight Indigo" przeniesiona 1:1 z src/styles.css aplikacji
+   (wartości oklch przeliczone na sRGB, żeby działały modyfikatory krycia
+   Tailwinda typu /70). Ciemny, spokojny, technologiczny — bez neonów.
+
+   Uwaga: brief V2 (sekcja 2) rekomendował akcent złoty #C6A25B. Na polecenie
+   właściciela landing trzyma się palety aplikacji — akcentem jest elektryczny
+   indygo. Token --tcs-gold zostaje zdefiniowany, więc powrót do złota to
+   zmiana jednej wartości w tailwind.config.ts (colors.primary). */
+:root {
+  color-scheme: dark;
+
+  --tcs-background: #010205;
+  --tcs-surface: #060810;
+  --tcs-surface-elevated: #0a0e18;
+  --tcs-secondary: #141823;
+  --tcs-muted: #0e111a;
+
+  --tcs-primary: #4f76ff;
+  --tcs-primary-glow: #5b9eff;
+
+  --tcs-foreground: #f9fafc;
+  --tcs-muted-foreground: #808791;
+
+  --tcs-success: #42c070;
+  --tcs-warning: #efa810;
+  --tcs-destructive: #f53b4b;
+
+  --tcs-border: rgba(45, 51, 64, 0.55);
+
+  /* Zapas: akcent złoty z briefu V2, gdyby właściciel wrócił do rekomendacji. */
+  --tcs-gold: #c6a25b;
+
+  --tcs-gradient-hero: radial-gradient(
+    ellipse at top,
+    rgba(36, 48, 96, 0.55) 0%,
+    #010205 65%
+  );
+  --tcs-shadow-elegant: 0 24px 60px -28px rgba(79, 118, 255, 0.45);
+  --tcs-shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 8px 24px -16px rgba(0, 0, 0, 0.55);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--tcs-background);
+    color: var(--tcs-foreground);
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem; /* mobile min 16px — brief sekcja 2 */
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Brak poziomego scrolla przy 320px — brief sekcja 23. */
+    overflow-x: hidden;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      font-size: 1.0625rem;
+    }
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-sora), var(--font-manrope), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  /* Widoczny focus dla klawiatury — brief sekcja 23 (WCAG 2.2 AA). */
+  :focus-visible {
+    outline: 2px solid var(--tcs-primary-glow);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--tcs-primary);
+    color: var(--tcs-background);
+  }
+}
+
+@layer components {
+  /* Kontener treści z bezpiecznymi marginesami. */
+  .tcs-container {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  /* Eyebrow — wersaliki wyłącznie tu i w krótkich CTA (brief sekcja 2). */
+  .tcs-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--tcs-muted-foreground);
+  }
+
+  /* Tło hero — poświata marki, bez konkurowania z CTA. */
+  .tcs-hero-glow {
+    background: var(--tcs-gradient-hero);
+  }
+}
+
+/* Subtelne wejście sekcji — 150–220ms, bez przesuwania layoutu (brief sekcja 2). */
+@keyframes tcsFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tcs-fade-in {
+  animation: tcsFadeIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

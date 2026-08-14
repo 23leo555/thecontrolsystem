@@ -1,0 +1,147 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
+import { isValidEmail, isValidFirstName, normalizeEmail } from "@/lib/validation";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
+import { sendEmail, protocolDeliveryTemplate } from "@/lib/email";
+import { site } from "@/lib/site";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+interface ResetBody {
+  firstName?: string;
+  email?: string;
+  marketingConsent?: boolean;
+  consentVersion?: string;
+  turnstileToken?: string;
+  source?: Record<string, string | undefined>;
+}
+
+/**
+ * POST /api/reset — zapis leada + wysyłka Protokołu (sekcja 7).
+ *
+ * Kluczowa zasada z sekcji 23: błąd wysyłki e-maila NIE może skasować leada.
+ * Lead zapisujemy zawsze; e-mail jest best-effort i logowany w email_events.
+ */
+export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+
+  pruneRateLimits();
+  const limited = rateLimit(`reset:${ip}`, 5, 60_000);
+  if (!limited.allowed) {
+    return NextResponse.json(
+      { ok: false, error: "Zbyt wiele prób. Spróbuj ponownie za chwilę." },
+      { status: 429, headers: { "Retry-After": String(limited.retryAfterSec) } },
+    );
+  }
+
+  let body: ResetBody;
+  try {
+    body = (await req.json()) as ResetBody;
+  } catch {
+    return NextResponse.json({ ok: false, error: "Nieprawidłowe dane." }, { status: 400 });
+  }
+
+  const firstName = (body.firstName ?? "").trim();
+  const email = normalizeEmail(body.email ?? "");
+
+  if (!isValidFirstName(firstName)) {
+    return NextResponse.json(
+      { ok: false, field: "firstName", error: "Podaj imię (minimum 2 znaki)." },
+      { status: 400 },
+    );
+  }
+  if (!isValidEmail(email)) {
+    return NextResponse.json(
+      { ok: false, field: "email", error: "Podaj poprawny adres e-mail." },
+      { status: 400 },
+    );
+  }
+  // Brief V2 sekcja 8: NIE wymagamy osobnej zgody na politykę prywatności.
+  // Podstawą przesłania Protokołu jest realizacja żądania użytkownika, a pod
+  // formularzem stoi klauzula informacyjna. Wymagana jest wyłącznie zgoda
+  // marketingowa — i tylko wtedy, gdy użytkownik sam ją zaznaczy.
+
+  const turnstile = await verifyTurnstile(body.turnstileToken, ip);
+  if (!turnstile.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Weryfikacja antyspamowa nie powiodła się. Odśwież stronę." },
+      { status: 400 },
+    );
+  }
+
+  const src = body.source ?? {};
+  const db = supabaseAdmin();
+
+  // Idempotencja: ten sam e-mail nie tworzy drugiego leada, tylko aktualizuje istniejącego
+  // (sekcja 23: „Ten sam email wraca po tygodniu").
+  // Atrybucja first-touch jest zachowywana po stronie bazy — patrz funkcja upsert_lead.
+  const { data: rows, error: upsertError } = await db.rpc("upsert_lead", {
+    p_first_name: firstName,
+    p_email: email,
+    p_marketing_consent: body.marketingConsent === true,
+    // Rozliczalność zgody: zapisujemy, która wersja treści obowiązywała.
+    p_consent_version: body.consentVersion ?? site.consentVersion,
+    p_source_first: src.source_first ?? "reset_form",
+    p_utm_source: src.utm_source ?? null,
+    p_utm_medium: src.utm_medium ?? null,
+    p_utm_campaign: src.utm_campaign ?? null,
+    p_utm_content: src.utm_content ?? null,
+    p_utm_term: src.utm_term ?? null,
+    p_referrer: src.referrer ?? null,
+    p_landing_path: src.landing_path ?? null,
+  });
+
+  const lead = Array.isArray(rows)
+    ? (rows[0] as { id: string; email_bounced: boolean } | undefined)
+    : undefined;
+
+  if (upsertError || !lead) {
+    // Log serwerowy — bez niego 500 jest nie do zdiagnozowania na produkcji.
+    // Nie zawiera danych osobowych, tylko komunikat bazy.
+    console.error("[/api/reset] upsert_lead nieudany:", {
+      message: upsertError?.message,
+      code: upsertError?.code,
+      details: upsertError?.details,
+      hint: upsertError?.hint,
+    });
+    return NextResponse.json(
+      { ok: false, error: "Nie udało się zapisać zgłoszenia. Spróbuj ponownie." },
+      { status: 500 },
+    );
+  }
+
+  // --- E-mail: best effort, nie blokuje sukcesu zapisu ---
+  let emailOk = false;
+  if (!lead.email_bounced) {
+    const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? site.url}/protokol-resetu.pdf`;
+    const tpl = protocolDeliveryTemplate(firstName, downloadUrl);
+    const sent = await sendEmail({ to: email, subject: tpl.subject, html: tpl.html, text: tpl.text });
+    emailOk = sent.ok;
+
+    await db.from("email_events").insert({
+      lead_id: lead.id,
+      provider_message_id: sent.messageId ?? null,
+      template_key: "protocol_delivery",
+      event_type: sent.ok ? "sent" : "bounced",
+      raw_event: sent.ok ? null : { error: sent.error },
+    });
+
+    // Status dostarczenia na samym leadzie (brief sekcja 15) — żeby dało się
+    // filtrować bez joinowania email_events. Nieudana wysyłka NIE cofa zapisu
+    // leada; użytkownik i tak pobierze PDF ze strony podziękowania.
+    await db
+      .from("leads")
+      .update({
+        email_status: sent.ok ? "sent" : "bounced",
+        protocol_sent_at: sent.ok ? new Date().toISOString() : null,
+      })
+      .eq("id", lead.id);
+  }
+
+  return NextResponse.json({ ok: true, emailSent: emailOk });
+}

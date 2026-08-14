@@ -1,0 +1,23 @@
+# zależności
+node_modules/
+
+# build
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# środowisko — NIGDY nie commitować
+.env
+.env.local
+.env*.local
+
+# logi z deployów (artefakty, nie kod)
+*.log
+
+# vercel
+.vercel/
+
+# system
+.DS_Store
+Thumbs.db
