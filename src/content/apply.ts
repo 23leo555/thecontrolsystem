@@ -45,18 +45,21 @@ export const resultBooked = {
 } as const;
 
 /**
- * Wyjście dla kandydatów, którzy nie idą (jeszcze) na rozmowę.
+ * Droga do Protokołu Resetu na ekranie wyniku — przy każdym statusie.
  *
  * ODSTĘPSTWO OD BRIEFU, decyzja właściciela z 2026-08-15: sekcje Z1 i Z2 mówią
  * „CTA: brak" i zakazują kierowania do tańszego produktu. Właściciel przesądził,
  * że po ukończeniu ankiety ma być droga do Protokołu Resetu — bez tego ekran
  * odmowy jest ślepą uliczką, a /reset nie ma na całej stronie żadnego wejścia.
  *
- * Świadomie NIE pokazujemy tego przy statusie Qualified: tam jedyną decyzją
- * pozostaje rezerwacja terminu (G1, AA1).
+ * Przy statusie Qualified sekcja stoi POD kalendarzem i ma własny nagłówek:
+ * rezerwacja terminu zostaje pierwszym krokiem, a Protokół jest tym, co można
+ * zrobić w międzyczasie — nie alternatywą dla rozmowy (G1, AA1).
  */
 export const resultProtocolOffer = {
   headline: "Zacznij od 7-dniowego Protokołu Resetu.",
+  /** Wariant dla osób, które mają już przed sobą rozmowę. */
+  headlineQualified: "Zanim porozmawiamy, możesz zacząć działać.",
   supporting:
     "To bezpłatna instrukcja na najbliższy tydzień: co robisz, kiedy to robisz i jaka jest wersja minimum, gdy dzień nie idzie zgodnie z planem.",
   cta: "ODBIERAM 7-DNIOWY PROTOKÓŁ RESETU",

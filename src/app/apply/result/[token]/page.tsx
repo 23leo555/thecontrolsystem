@@ -47,10 +47,10 @@ async function readStatus(applicationId: string): Promise<Status | null> {
  * odstępstwo od Z1 — patrz komentarz przy `resultProtocolOffer`).
  * Utrzymana wizualnie niżej niż główny komunikat: to wyjście awaryjne, nie oferta.
  */
-function ProtocolOffer() {
+function ProtocolOffer({ headline = resultProtocolOffer.headline }: { headline?: string }) {
   return (
     <section className="mt-12 rounded-[14px] border border-tcs-border bg-tcs-surface p-6 sm:p-8">
-      <h2 className="text-[20px] font-bold text-tcs-text sm:text-[22px]">{resultProtocolOffer.headline}</h2>
+      <h2 className="text-[20px] font-bold text-tcs-text sm:text-[22px]">{headline}</h2>
       <p className="mt-3 text-[15px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
         {resultProtocolOffer.supporting}
       </p>
@@ -140,6 +140,9 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
         <p className="mt-6 text-[13px] leading-relaxed text-tcs-text-muted">
           {resultQualified.microcopy}
         </p>
+
+        {/* Pod kalendarzem, nie nad nim: rezerwacja terminu zostaje pierwszym krokiem. */}
+        <ProtocolOffer headline={resultProtocolOffer.headlineQualified} />
       </Shell>
     );
   }
