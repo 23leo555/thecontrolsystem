@@ -21,9 +21,11 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as { source?: unknown };
     const db = supabaseAdmin();
+    // lead_id zostaje puste — draft jest anonimowy do czasu submitu (T4).
     await db.from("applications").insert({
       id: applicationId,
       status: "DRAFT",
+      is_draft: true,
       source_snapshot: body.source ?? {},
       started_at: new Date().toISOString(),
     });
@@ -46,7 +48,7 @@ export async function PATCH(request: Request) {
       .from("applications")
       .update({ last_step: body.step, updated_at: new Date().toISOString() })
       .eq("id", body.applicationId)
-      .eq("status", "DRAFT");
+      .eq("is_draft", true);
   } catch (err) {
     console.error("[apply/draft] nie udało się zapisać postępu", err);
   }

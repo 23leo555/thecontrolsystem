@@ -52,7 +52,9 @@ export async function POST(request: Request) {
     await db.from("applications").upsert(
       {
         id: applicationId,
-        answers: validation.normalized,
+        // Kolumna nazywa się answers_json — nazwa jest z pierwotnego schematu.
+        answers_json: validation.normalized,
+        form_version: result.version,
         score: result.score,
         status: result.status,
         scoring_version: result.version,
@@ -61,7 +63,9 @@ export async function POST(request: Request) {
         breakdown: result.breakdown,
         source_snapshot: source,
         idempotency_key: idempotencyKey,
+        is_draft: false,
         submitted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
       { onConflict: "idempotency_key" }
     );
