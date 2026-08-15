@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { track, touchForSubmission } from "@/lib/analytics";
-import { isValidEmail, isValidFirstName } from "@/lib/validation";
+import { isValidEmail, isValidFirstName, toE164 } from "@/lib/validation";
 import { site } from "@/lib/site";
 import { resetCopy } from "@/content/reset";
 
@@ -15,7 +15,8 @@ const c = resetCopy.form;
  * Formularz odbioru Protokołu (brief sekcje 7 i 8).
  *
  * Zasady, których nie wolno rozluźnić:
- * - tylko dwa pola: imię i email,
+ * - trzy pola: imię, email i telefon (telefon obowiązkowy od 2026-08-15,
+ *   decyzja właściciela; brief V2 sekcja 7 przewidywał tylko dwa),
  * - zgoda marketingowa jest OSOBNA i domyślnie niezaznaczona, a jej brak nie
  *   blokuje wysyłki Protokołu,
  * - nie ma checkboxa „akceptuję politykę prywatności" — polityka jest
@@ -28,11 +29,13 @@ export function ResetForm({ formId }: { formId: string }) {
   const uid = useId();
   const nameId = `${uid}-name`;
   const emailId = `${uid}-email`;
+  const phoneId = `${uid}-phone`;
 
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [touched, setTouched] = useState<{ firstName?: boolean; email?: boolean }>({});
+  const [touched, setTouched] = useState<{ firstName?: boolean; email?: boolean; phone?: boolean }>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -41,7 +44,10 @@ export function ResetForm({ formId }: { formId: string }) {
 
   const nameValid = isValidFirstName(firstName);
   const emailValid = isValidEmail(email);
-  const canSubmit = nameValid && emailValid && !submitting;
+  // Ta sama normalizacja co po stronie serwera — użytkownik może wpisać numer
+  // ze spacjami, z zerem albo z prefiksem, a i tak zapiszemy go w E.164.
+  const phoneValid = toE164(phone) !== null;
+  const canSubmit = nameValid && emailValid && phoneValid && !submitting;
 
   /** reset_form_start — pierwszy focus w formularzu, raz na sesję widoku. */
   function onFirstFocus() {
@@ -52,7 +58,7 @@ export function ResetForm({ formId }: { formId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setTouched({ firstName: true, email: true });
+    setTouched({ firstName: true, email: true, phone: true });
     if (!canSubmit || inFlight.current) return; // blokada podwójnego kliknięcia
 
     inFlight.current = true;
@@ -66,6 +72,7 @@ export function ResetForm({ formId }: { formId: string }) {
         body: JSON.stringify({
           firstName,
           email,
+          phone,
           marketingConsent,
           consentVersion: site.consentVersion,
           // Źródło z utrwalonego first-touch — przetrwa przejście przez podstrony.
@@ -146,6 +153,31 @@ export function ResetForm({ formId }: { formId: string }) {
         {touched.email && !emailValid && (
           <p id={`${emailId}-error`} className="mt-1.5 text-sm text-danger">
             {c.emailError}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor={phoneId} className="mb-1.5 block text-sm font-semibold">
+          {c.phoneLabel}
+        </label>
+        <input
+          id={phoneId}
+          name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+          aria-invalid={touched.phone && !phoneValid ? true : undefined}
+          aria-describedby={touched.phone && !phoneValid ? `${phoneId}-error` : undefined}
+          className={fieldClass}
+          placeholder={c.phonePlaceholder}
+        />
+        {touched.phone && !phoneValid && (
+          <p id={`${phoneId}-error`} className="mt-1.5 text-sm text-danger">
+            {c.phoneError}
           </p>
         )}
       </div>

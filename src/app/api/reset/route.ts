@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { isValidEmail, isValidFirstName, normalizeEmail } from "@/lib/validation";
+import { isValidEmail, isValidFirstName, normalizeEmail, toE164 } from "@/lib/validation";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
 import { sendEmail, protocolDeliveryTemplate } from "@/lib/email";
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 interface ResetBody {
   firstName?: string;
   email?: string;
+  phone?: string;
   marketingConsent?: boolean;
   consentVersion?: string;
   turnstileToken?: string;
@@ -48,6 +49,9 @@ export async function POST(req: NextRequest) {
 
   const firstName = (body.firstName ?? "").trim();
   const email = normalizeEmail(body.email ?? "");
+  // Telefon jest obowiązkowy od 2026-08-15 (decyzja właściciela). Walidacja musi
+  // stać także tutaj — sprawdzenie w przeglądarce da się pominąć zwykłym curlem.
+  const phone = toE164(body.phone ?? "");
 
   if (!isValidFirstName(firstName)) {
     return NextResponse.json(
@@ -58,6 +62,12 @@ export async function POST(req: NextRequest) {
   if (!isValidEmail(email)) {
     return NextResponse.json(
       { ok: false, field: "email", error: "Podaj poprawny adres e-mail." },
+      { status: 400 },
+    );
+  }
+  if (!phone) {
+    return NextResponse.json(
+      { ok: false, field: "phone", error: "Podaj poprawny numer telefonu." },
       { status: 400 },
     );
   }
@@ -99,6 +109,17 @@ export async function POST(req: NextRequest) {
   const lead = Array.isArray(rows)
     ? (rows[0] as { id: string; email_bounced: boolean } | undefined)
     : undefined;
+
+  // `upsert_lead` nie przyjmuje telefonu (powstała, gdy formularz go nie zbierał),
+  // więc dopisujemy go osobno. Nieudany zapis numeru nie może przerwać wysyłki
+  // Protokołu — lead jest już w bazie, a numer to dana dodatkowa.
+  if (lead?.id) {
+    const { error: phoneError } = await db
+      .from("leads")
+      .update({ phone_e164: phone })
+      .eq("id", lead.id);
+    if (phoneError) console.error("[/api/reset] zapis telefonu nieudany:", phoneError.message);
+  }
 
   if (upsertError || !lead) {
     // Log serwerowy — bez niego 500 jest nie do zdiagnozowania na produkcji.

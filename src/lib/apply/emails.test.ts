@@ -51,6 +51,20 @@ describe("szablony e-mail lejka /apply", () => {
     expect(tpl.text).not.toMatch(/score|punkt|dochod|dochód|próg/i);
   });
 
+  it("stopka każdej wiadomości niesie e-mail, telefon i Instagram", () => {
+    const wszystkie = [
+      qualifiedTemplate("Jan", "https://example.test/wynik"),
+      manualReviewTemplate("Jan"),
+      notQualifiedTemplate("Jan"),
+    ];
+
+    for (const tpl of wszystkie) {
+      expect(tpl.html).toContain("tel:+48512543929");
+      expect(tpl.html).toContain("512 543 929");
+      expect(tpl.html).toContain("Instagram");
+    }
+  });
+
   it("powiadomienie wewnętrzne pomija dochód i odpowiedź opisową (AC6)", () => {
     const tpl = ownerNotificationTemplate({
       firstName: "Jan",

@@ -7,6 +7,9 @@ export const site = {
   brand: "THE CONTROL SYSTEM by Krystian Ćwik",
   author: "Krystian Ćwik",
   ownerEmail: "krystian.cwik@thecontrolsystem.biz",
+  /** Telefon kontaktowy — w stopce wiadomości obok Instagrama. */
+  ownerPhone: "+48512543929",
+  ownerPhoneDisplay: "512 543 929",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://thecontrolsystem.biz",
   instagram: "@krystian_cwik",
   instagramUrl: "https://instagram.com/krystian_cwik",

@@ -95,6 +95,10 @@ export const resetCopy = {
     emailLabel: "Adres email",
     emailPlaceholder: "twoj@email.pl",
     emailError: "Podaj poprawny adres email — tam wyślemy Protokół.",
+    /** Pole obowiązkowe od 2026-08-15 (decyzja właściciela) — patrz komentarz w ResetForm. */
+    phoneLabel: "Numer telefonu",
+    phonePlaceholder: "600 000 000",
+    phoneError: "Podaj poprawny numer telefonu.",
     marketingConsent:
       "Chcę otrzymywać od Krystiana Ćwika / The Control System drogą elektroniczną dodatkowe materiały edukacyjne, wskazówki, informacje o The Control System oraz informacje handlowe na podany adres email. Wiem, że zgodę mogę wycofać w każdej chwili.",
     /**

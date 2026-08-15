@@ -97,6 +97,8 @@ export function emailLayout(bodyHtml: string): string {
     <p style="margin:0;font-size:12px;color:#808791 !important;">
       <a href="mailto:${site.ownerEmail}" style="color:#5b9eff !important;text-decoration:none;">${site.ownerEmail}</a>
       &nbsp;·&nbsp;
+      <a href="tel:${site.ownerPhone}" style="color:#5b9eff !important;text-decoration:none;">${site.ownerPhoneDisplay}</a>
+      &nbsp;·&nbsp;
       <a href="${site.instagramUrl}" style="color:#5b9eff !important;text-decoration:none;">Instagram ${site.instagram}</a>
     </p>
   </div>
@@ -169,6 +171,7 @@ export function protocolDeliveryTemplate(firstName: string, downloadUrl: string)
       </p>
       <p style="margin:0;color:#808791 !important;line-height:1.6;font-size:14px;">
         <a href="mailto:${site.ownerEmail}" style="color:#5b9eff !important;text-decoration:none;">${site.ownerEmail}</a><br>
+        Telefon: <a href="tel:${site.ownerPhone}" style="color:#5b9eff !important;text-decoration:none;">${site.ownerPhoneDisplay}</a><br>
         Instagram: <a href="${site.instagramUrl}" style="color:#5b9eff !important;text-decoration:none;">${site.instagram}</a>
       </p>
     `),
@@ -201,6 +204,7 @@ Powodzenia,
 Krystian Ćwik
 Twórca The Control System
 ${site.ownerEmail}
+Telefon: ${site.ownerPhoneDisplay}
 Instagram: ${site.instagram}`,
   };
 }
