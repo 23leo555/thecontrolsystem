@@ -3,7 +3,12 @@ import crypto from "node:crypto";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase";
 import { site } from "@/lib/site";
-import { resultQualified, resultManualReview, resultNotQualified } from "@/content/apply";
+import {
+  resultQualified,
+  resultManualReview,
+  resultNotQualified,
+  resultProtocolOffer,
+} from "@/content/apply";
 
 /**
  * Strona wyniku aplikacji — sekcje X2, Y1, Z1.
@@ -59,6 +64,30 @@ async function readStatus(applicationId: string): Promise<Status | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Droga do Protokołu Resetu dla kandydatów bez rozmowy (decyzja właściciela,
+ * odstępstwo od Z1 — patrz komentarz przy `resultProtocolOffer`).
+ * Utrzymana wizualnie niżej niż główny komunikat: to wyjście awaryjne, nie oferta.
+ */
+function ProtocolOffer() {
+  return (
+    <section className="mt-12 rounded-[14px] border border-tcs-border bg-tcs-surface p-6 sm:p-8">
+      <h2 className="text-[20px] font-bold text-tcs-text sm:text-[22px]">{resultProtocolOffer.headline}</h2>
+      <p className="mt-3 text-[15px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
+        {resultProtocolOffer.supporting}
+      </p>
+      {/* Styl CTA przepisany z ApplyFlow, nie z ButtonLink: lejek aplikacji ma
+          własną paletę (złoto), a wspólny komponent renderuje indygo landingu. */}
+      <Link
+        href={site.routes.reset}
+        className="mt-6 inline-flex min-h-[56px] w-full items-center justify-center rounded-[14px] bg-tcs-gold px-6 text-[14px] font-bold tracking-[0.04em] text-[#07090C] transition-colors hover:bg-tcs-gold-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-tcs-blue focus-visible:ring-offset-[3px] focus-visible:ring-offset-tcs-bg sm:w-auto sm:min-w-[280px] sm:text-[15px]"
+      >
+        {resultProtocolOffer.cta}
+      </Link>
+    </section>
+  );
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -154,12 +183,15 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
         <p className="mt-6 text-[13px] leading-relaxed text-tcs-text-muted">
           {resultManualReview.microcopy}
         </p>
+        {/* Czekanie na decyzję nie musi być pustym tygodniem. */}
+        <ProtocolOffer />
       </Shell>
     );
   }
 
   // NOT_QUALIFIED oraz brak statusu w bazie: ten sam, neutralny ekran.
-  // Bez score, progu, dochodu, powodu i bez jakiegokolwiek CTA (Z1, Z2).
+  // Bez score, progu, dochodu i powodu decyzji (Z2). Jedyne CTA to Protokół
+  // Resetu — świadome odstępstwo od Z1 na decyzję właściciela.
   return (
     <Shell>
       <p className="text-[11px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-xs">
@@ -174,6 +206,7 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
       <p className="mt-6 text-[13px] leading-relaxed text-tcs-text-muted">
         {resultNotQualified.microcopy}
       </p>
+      <ProtocolOffer />
     </Shell>
   );
 }

@@ -44,6 +44,24 @@ export const resultBooked = {
     "Szczegóły spotkania otrzymasz e-mailem. Przygotuj informację o swoim głównym celu na pierwsze 90 dni i największej przeszkodzie, która dotąd rozbijała regularność.",
 } as const;
 
+/**
+ * Wyjście dla kandydatów, którzy nie idą (jeszcze) na rozmowę.
+ *
+ * ODSTĘPSTWO OD BRIEFU, decyzja właściciela z 2026-08-15: sekcje Z1 i Z2 mówią
+ * „CTA: brak" i zakazują kierowania do tańszego produktu. Właściciel przesądził,
+ * że po ukończeniu ankiety ma być droga do Protokołu Resetu — bez tego ekran
+ * odmowy jest ślepą uliczką, a /reset nie ma na całej stronie żadnego wejścia.
+ *
+ * Świadomie NIE pokazujemy tego przy statusie Qualified: tam jedyną decyzją
+ * pozostaje rezerwacja terminu (G1, AA1).
+ */
+export const resultProtocolOffer = {
+  headline: "Zacznij od 7-dniowego Protokołu Resetu.",
+  supporting:
+    "To bezpłatna instrukcja na najbliższy tydzień: co robisz, kiedy to robisz i jaka jest wersja minimum, gdy dzień nie idzie zgodnie z planem.",
+  cta: "ODBIERAM 7-DNIOWY PROTOKÓŁ RESETU",
+} as const;
+
 /** Sekcja Y1 — Manual Review. Bez CTA i bez kalendarza. */
 export const resultManualReview = {
   eyebrow: "APLIKACJA OTRZYMANA",
