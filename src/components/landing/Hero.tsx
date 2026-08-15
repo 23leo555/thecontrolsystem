@@ -28,33 +28,23 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-tcs-bg via-transparent to-transparent" />
       </div>
 
-      <div className="relative mx-auto max-w-[1200px] px-4 pb-16 pt-14 sm:px-8 sm:pb-20 sm:pt-20 lg:pb-24 lg:pt-28">
-        <div className="max-w-[46rem]">
+      {/* Zewnętrzny kontener 1200 px jest wspólny z KROKIEM 1, dowodami i finalnym CTA —
+          poszerzamy wyłącznie lokalny wrapper poniżej (brief hero, E2 + K3). */}
+      <div className="relative mx-auto max-w-[1200px] px-4 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20 lg:pb-20 lg:pt-28">
+        <div className="max-w-[46rem] lg:max-w-[70rem]">
           <p className="text-[11px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-tcs-gold sm:text-xs">
             {hero.eyebrow}
           </p>
 
-          <h1 className="mt-6 text-[34px] font-extrabold leading-[1.06] tracking-[-0.02em] text-tcs-text sm:text-[44px] lg:text-[58px]">
+          {/* `break-words` (overflow-wrap: break-word) zabezpiecza „podporządkowywania"
+              — przy 360/390 px słowo jest szersze niż kolumna i było obcinane przez
+              overflow-hidden sekcji (brief hero, B3). Hyphens korzystają z lang="pl". */}
+          <h1 className="mt-6 hyphens-auto break-words text-[34px] font-extrabold leading-[1.06] tracking-[-0.02em] text-tcs-text sm:text-[44px] lg:text-[58px]">
             {hero.headline}
           </h1>
 
-          <p className="mt-6 max-w-[54ch] text-[17px] leading-relaxed text-tcs-text-muted sm:text-[19px]">
+          <p className="mt-6 max-w-[54ch] text-[17px] leading-relaxed text-tcs-text-muted sm:text-[19px] lg:max-w-[88ch]">
             {hero.supporting}
-          </p>
-
-          {/* Badge gwarancji: spokojny blok z cienką złotą linią.
-              Bez ikony tarczy i bez glow (K). */}
-          <div className="mt-9 max-w-[52ch] border-l-2 border-tcs-gold bg-tcs-surface/50 py-4 pl-5 pr-4">
-            <p className="text-[12px] font-bold tracking-[0.16em] text-tcs-gold">
-              {hero.riskReversal.badge}
-            </p>
-            <p className="mt-2 text-[14px] leading-relaxed text-tcs-text-muted sm:text-[15px]">
-              {hero.riskReversal.body}
-            </p>
-          </div>
-
-          <p className="mt-10 text-[12px] font-semibold tracking-[0.16em] text-tcs-text-muted sm:text-[13px]">
-            {hero.nextStep}
           </p>
         </div>
       </div>

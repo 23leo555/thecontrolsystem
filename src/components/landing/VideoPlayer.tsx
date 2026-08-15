@@ -148,8 +148,8 @@ export function VideoPlayer() {
           preload="metadata"
           playsInline
           controls={phase === "playing" || phase === "ended"}
-          // Bez atrybutu `poster` — nakładka niżej renderuje ten sam kadr w AVIF/WebP
-          // już w HTML-u serwerowym. Atrybut powodowałby drugie pobranie (JPEG).
+          // Bez atrybutu `poster` — warstwę startową renderuje nakładka niżej,
+          // już w HTML-u serwerowym. Atrybut powodowałby dodatkowe pobranie.
           aria-label="Film: Jak działa The Control System"
           onTimeUpdate={handleTimeUpdate}
           onWaiting={handleWaiting}
@@ -173,22 +173,25 @@ export function VideoPlayer() {
             type="button"
             onClick={handlePlay}
             className="group absolute inset-0 z-10 flex flex-col items-center justify-center focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-tcs-blue"
-            aria-label={`Odtwórz film: Jak działa The Control System, czas trwania ${site.vsl.durationLabel}`}
+            aria-label="Odtwórz film: Jak działa The Control System"
           >
-            <picture>
-              <source srcSet={`${site.vsl.poster}.avif`} type="image/avif" />
-              <source srcSet={`${site.vsl.poster}.webp`} type="image/webp" />
-              <img
-                src={`${site.vsl.poster}.jpg`}
-                alt=""
-                width={1280}
-                height={720}
-                className="absolute inset-0 h-full w-full object-cover"
-                fetchPriority="high"
-              />
-            </picture>
-            {/* 18% czarnego overlayu dla czytelności kontrolki (M2) */}
-            <span aria-hidden className="absolute inset-0 bg-black/[0.18]" />
+            {/* Miniatura brandowa zamiast zatrzymanego kadru z twarzą (brief hero, H3).
+                Składana z tła i logo zamiast pliku 1920×1080 — zero dodatkowego
+                transferu, brak CLS (wysokość rezerwuje aspect-video wrappera).
+                Gdy właściciel zatwierdzi gotowy plakat, wystarczy wrócić tu do
+                <picture> i podać nową, wersjonowaną ścieżkę w site.vsl.poster. */}
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-tcs-bg bg-[radial-gradient(120%_90%_at_50%_18%,rgba(28,60,110,0.55)_0%,rgba(9,12,18,0)_62%)]"
+            />
+            <img
+              src="/brand/tcs-logo.webp"
+              alt=""
+              width={256}
+              height={256}
+              fetchPriority="high"
+              className="absolute left-1/2 top-[20%] w-[64px] -translate-x-1/2 sm:w-[88px] lg:w-[104px]"
+            />
 
             <span
               aria-hidden
@@ -197,9 +200,6 @@ export function VideoPlayer() {
               <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6 sm:h-7 sm:w-7" fill="#fff">
                 <path d="M8 5v14l11-7z" />
               </svg>
-            </span>
-            <span className="relative mt-4 text-[13px] font-semibold tracking-[0.12em] text-tcs-text sm:text-sm">
-              OBEJRZYJ {site.vsl.durationLabel}
             </span>
           </button>
         )}

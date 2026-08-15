@@ -13,23 +13,27 @@
 /** Jedyny wariant CTA na całej stronie (sekcja O1). */
 export const CTA_LABEL = "ZRÓB PIERWSZY KROK I ODZYSKAJ KONTROLĘ";
 
-/** Sekcja K — Hero. */
+/**
+ * Sekcja K — Hero.
+ *
+ * Aktualizacja 15.08.2026 (brief hero, sekcja D): headline bez słowa „pierwszych"
+ * i bez pauzy przed „bez". Moduł CONTROL RESET 90 oraz powielony komunikat
+ * „KROK 1 · OBEJRZYJ MATERIAŁ 4:43" usunięte z hero — jedyna etykieta kroku 1
+ * żyje w `step1.eyebrow`. Footerowy link „Warunki Control Reset 90" i route
+ * /control-reset-90 zostają nietknięte (F, sekcja N).
+ */
 export const hero = {
   eyebrow: "DLA ZAPRACOWANYCH MĘŻCZYZN 30+, KTÓRZY FUNKCJONUJĄ ZAWODOWO NA WYSOKIM POZIOMIE",
   headline:
-    "Zredukuj brzuch, zmniejsz talię i odzyskaj energię w ciągu pierwszych 90 dni — bez podporządkowywania życia kolejnej diecie i planowi treningowemu.",
+    "Zredukuj brzuch, zmniejsz talię i odzyskaj energię w ciągu 90 dni bez podporządkowywania życia kolejnej diecie i planowi treningowemu.",
   supporting:
     "The Control System to indywidualny proces 1 na 1, który łączy biologię, zachowanie i realne warunki Twojego życia w jeden system. Nie dopasowujemy Twojego życia do planu. Dopasowujemy system do Twojego życia.",
-  riskReversal: {
-    badge: "CONTROL RESET 90",
-    body: "Wspólnie ustalamy konkretny, mierzalny i realistyczny rezultat na pierwsze 90 dni. Jeśli realizujesz proces, raportujesz i wdrażasz uzgodnione działania, a mimo to go nie osiągniemy — otrzymujesz zwrot 100% inwestycji zgodnie z warunkami gwarancji.",
-  },
-  nextStep: "KROK 1 · OBEJRZYJ MATERIAŁ 4:43",
 } as const;
 
 /** Sekcja L — Krok 1 / VSL. */
 export const step1 = {
-  eyebrow: "KROK 1 · 4 MINUTY 43 SEKUNDY",
+  /** Bez długości materiału — czas nie jest eksponowany w CTA do filmu (brief hero, D+F). */
+  eyebrow: "KROK 1 · OBEJRZYJ MATERIAŁ",
   headline:
     "Zobacz, dlaczego kolejna dieta albo plan treningowy prawdopodobnie nie rozwiążą Twojego problemu.",
   supporting:
