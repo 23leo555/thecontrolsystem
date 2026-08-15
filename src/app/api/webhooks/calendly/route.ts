@@ -2,14 +2,21 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail, emailLayout } from "@/lib/email";
+import { eventUriFromInvitee } from "@/lib/calendly";
 import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Webhook Calendly (sekcje 13, 17, 23).
+ * Webhook Calendly (sekcje 13, 17, 23 oraz AA3).
  * Obsługiwane: invitee.created, invitee.canceled.
+ *
+ * Przełożenie terminu NIE jest osobnym zdarzeniem Calendly — przychodzi jako
+ * para: anulowanie starego zaproszenia (`rescheduled: true`) i utworzenie
+ * nowego (`old_invitee` wskazuje poprzednie). Kolejność dostarczenia nie jest
+ * gwarantowana, więc obie gałęzie oznaczają starą rezerwację jako
+ * `rescheduled`, a lead z nowym terminem nie jest cofany do CALL_CANCELED.
  *
  * Zasady:
  *  - podpis weryfikowany zgodnie z mechanizmem dostawcy (Calendly-Webhook-Signature),
@@ -64,6 +71,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (event === "invitee.created") {
+    // Calendly nie ma zdarzenia „rescheduled": przy zmianie terminu wysyła
+    // anulowanie starego zaproszenia i utworzenie nowego, wiążąc je polem
+    // `old_invitee`. Stąd bierzemy poprzedni termin do historii (AA3).
+    const previousStartAt = await readPreviousStart(invitee?.old_invitee ?? null);
+
     await db.from("bookings").upsert(
       {
         lead_id: link.leadId,
@@ -73,9 +85,18 @@ export async function POST(req: NextRequest) {
         end_at: invitee?.scheduled_event?.end_time ?? null,
         status: "booked",
         meeting_url: invitee?.scheduled_event?.location?.join_url ?? null,
+        previous_start_at: previousStartAt,
       },
       { onConflict: "calendly_event_uri" },
     );
+
+    // Stara rezerwacja zostaje w bazie jako ślad, ale przestaje być anulowaniem.
+    // Zdarzenia potrafią przyjść w odwrotnej kolejności, więc oznaczamy ją
+    // z obu stron — operacja jest idempotentna.
+    const oldEventUri = eventUriFromInvitee(invitee?.old_invitee ?? null);
+    if (oldEventUri) {
+      await db.from("bookings").update({ status: "rescheduled" }).eq("calendly_event_uri", oldEventUri);
+    }
 
     await db.from("leads").update({ lifecycle_status: "CALL_BOOKED" }).eq("id", link.leadId);
 
@@ -91,13 +112,21 @@ export async function POST(req: NextRequest) {
   }
 
   if (event === "invitee.canceled") {
+    // Przełożenie przychodzi jako anulowanie z `rescheduled: true`. Taki lead
+    // NIE jest utracony — ma nowy termin, więc nie wolno cofać go do
+    // CALL_CANCELED ani straszyć właściciela mailem o anulowaniu.
+    const rescheduled = invitee?.rescheduled === true || Boolean(invitee?.new_invitee);
+
     await db
       .from("bookings")
-      .update({ status: "canceled" })
+      .update({ status: rescheduled ? "rescheduled" : "canceled" })
       .eq("calendly_event_uri", eventUri);
 
-    await db.from("leads").update({ lifecycle_status: "CALL_CANCELED" }).eq("id", link.leadId);
-    await notifyOwner(invitee, "Rezerwacja anulowana");
+    if (!rescheduled) {
+      await db.from("leads").update({ lifecycle_status: "CALL_CANCELED" }).eq("id", link.leadId);
+    }
+
+    await notifyOwner(invitee, rescheduled ? "Termin przełożony" : "Rezerwacja anulowana");
   }
 
   return NextResponse.json({ ok: true });
@@ -129,6 +158,20 @@ function verifySignature(rawBody: string, header: string): boolean {
   const b = Buffer.from(parts.v1, "hex");
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
+}
+
+/** Termin poprzedniej rezerwacji — do kolumny `previous_start_at` (AA3). */
+async function readPreviousStart(oldInviteeUri: string | null): Promise<string | null> {
+  const oldEventUri = eventUriFromInvitee(oldInviteeUri);
+  if (!oldEventUri) return null;
+
+  const { data } = await supabaseAdmin()
+    .from("bookings")
+    .select("start_at")
+    .eq("calendly_event_uri", oldEventUri)
+    .maybeSingle();
+
+  return data?.start_at ?? null;
 }
 
 async function resolveLead(
@@ -192,6 +235,10 @@ interface CalendlyPayload {
     uri?: string;
     name?: string;
     email?: string;
+    /** Ustawiane przez Calendly przy przełożeniu terminu — patrz obsługa AA3. */
+    rescheduled?: boolean;
+    old_invitee?: string | null;
+    new_invitee?: string | null;
     tracking?: { utm_content?: string };
     scheduled_event?: {
       uri?: string;
