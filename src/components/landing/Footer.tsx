@@ -11,11 +11,18 @@ import { site } from "@/lib/site";
  * UWAGA: oba disclaimery są oznaczone w briefie jako DO FINALNEJ WERYFIKACJI
  * PRAWNEJ (bloker P0 z AN1) — nie publikować bez akceptacji prawnika.
  */
+/**
+ * Brief (S) wymienia cztery linki. „Warunki Control Reset 90" pokazujemy dopiero,
+ * gdy strona istnieje — dotąd prowadził w 404, a stopka z martwym odnośnikiem do
+ * warunków gwarancji jest gorsza niż jego brak. Przełącznik: `controlReset90Live`.
+ */
 const legalLinks = [
   { href: site.routes.privacy, label: "Polityka prywatności" },
   { href: site.routes.cookies, label: "Cookies" },
   { href: site.routes.legal, label: "Dane firmy i zastrzeżenia" },
-  { href: site.routes.controlReset90, label: "Warunki Control Reset 90" },
+  ...(site.controlReset90Live
+    ? [{ href: site.routes.controlReset90, label: "Warunki Control Reset 90" }]
+    : []),
 ];
 
 export function Footer() {

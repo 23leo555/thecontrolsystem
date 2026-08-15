@@ -33,6 +33,16 @@ export const site = {
   systemPageLive: process.env.NEXT_PUBLIC_SYSTEM_PAGE_LIVE === "true",
 
   /**
+   * Strona z pełnymi warunkami gwarancji (brief: /control-reset-90, bloker P0).
+   *
+   * Warunków jeszcze nie ma — musi je dostarczyć właściciel i zatwierdzić
+   * prawnik. Do tego czasu link w stopce jest ukryty, bo prowadził w 404,
+   * a hero obiecuje zwrot „zgodnie z warunkami gwarancji".
+   * Po opublikowaniu strony: NEXT_PUBLIC_CONTROL_RESET_90_LIVE=true.
+   */
+  controlReset90Live: process.env.NEXT_PUBLIC_CONTROL_RESET_90_LIVE === "true",
+
+  /**
    * VSL (brief sekcja M3). Master 311 MB nie trafia do repo ani do deployu —
    * na Vercel Blob leży wersja 720p/28,8 MB, mieszcząca się w budżecie <=30 MB.
    * Poster jest statyczny, więc pierwszy render nie czeka na sieć.

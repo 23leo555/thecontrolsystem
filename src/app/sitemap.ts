@@ -19,6 +19,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: site.routes.privacy, priority: 0.4 },
     { path: site.routes.cookies, priority: 0.4 },
     { path: site.routes.terms, priority: 0.4 },
+    { path: site.routes.legal, priority: 0.4 },
+    // Warunki gwarancji dołączają do mapy dopiero po publikacji strony (P0).
+    ...(site.controlReset90Live ? [{ path: site.routes.controlReset90, priority: 0.4 }] : []),
   ];
 
   return entries.map(({ path, priority }) => ({
