@@ -3,6 +3,7 @@ import {
   qualifiedTemplate,
   manualReviewTemplate,
   notQualifiedTemplate,
+  manualApprovedTemplate,
   ownerNotificationTemplate,
 } from "./emails";
 import type { Answers } from "./questions";
@@ -51,17 +52,23 @@ describe("szablony e-mail lejka /apply", () => {
     expect(tpl.text).not.toMatch(/score|punkt|dochod|dochód|próg/i);
   });
 
-  it("stopka każdej wiadomości niesie e-mail, telefon i Instagram", () => {
+  it("stopka każdej wiadomości do kandydata niesie e-mail, telefon i Instagram", () => {
     const wszystkie = [
       qualifiedTemplate("Jan", "https://example.test/wynik"),
       manualReviewTemplate("Jan"),
       notQualifiedTemplate("Jan"),
+      manualApprovedTemplate("Jan", "https://example.test/wynik"),
     ];
 
     for (const tpl of wszystkie) {
       expect(tpl.html).toContain("tel:+48512543929");
       expect(tpl.html).toContain("512 543 929");
       expect(tpl.html).toContain("Instagram");
+      // Wersja tekstowa nie dostaje stopki z układu HTML, więc ma własną —
+      // bez tego czytający plain text nie miał telefonu ani Instagrama.
+      expect(tpl.text).toContain("512 543 929");
+      expect(tpl.text).toContain("krystian.cwik@thecontrolsystem.biz");
+      expect(tpl.text).toContain("@krystian_cwik");
     }
   });
 

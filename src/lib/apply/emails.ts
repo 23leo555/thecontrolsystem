@@ -26,6 +26,17 @@ const signature = (full: boolean) =>
     full ? ' Ćwik<br><span style="color:#808791 !important;">Twórca The Control System</span>' : ""
   }</p>`;
 
+/**
+ * Stopka wersji tekstowej.
+ *
+ * `emailLayout` daje dane kontaktowe wyłącznie w HTML, więc odbiorca czytający
+ * wiadomość jako czysty tekst (a tak robi część klientów pocztowych i wszystkie
+ * czytniki ekranu w trybie plain) nie miał ani telefonu, ani Instagrama.
+ */
+const textFooter = `--
+Krystian Ćwik | The Control System
+${site.ownerEmail} · ${site.ownerPhoneDisplay} · Instagram ${site.instagram}`;
+
 const cta = (href: string, label: string) =>
   `<p style="margin:0 0 24px;">
      <a href="${href}" style="display:inline-block;background:#4f76ff !important;color:#010205 !important;
@@ -81,7 +92,9 @@ Krystian Ćwik
 Twórca The Control System
 
 PS Zanim porozmawiamy, możesz zacząć od bezpłatnego 7-dniowego Protokołu Resetu:
-${resetUrl}`,
+${resetUrl}
+
+${textFooter}`,
   };
 }
 
@@ -105,7 +118,9 @@ Twoja aplikacja została zapisana i trafiła do mojej osobistej weryfikacji.
 Jeśli zobaczę dopasowanie do procesu 1 na 1, otrzymasz wiadomość z kolejnym krokiem.
 Nie musisz ponownie wysyłać formularza.
 
-Krystian`,
+Krystian
+
+${textFooter}`,
   };
 }
 
@@ -145,7 +160,9 @@ wystarczającego dopasowania do tego formatu na ten moment.
 Krystian
 
 PS Jeżeli chcesz zacząć od czegoś konkretnego już teraz, odbierz bezpłatny 7-dniowy Protokół Resetu:
-${resetUrl}`,
+${resetUrl}
+
+${textFooter}`,
   };
 }
 
@@ -168,7 +185,9 @@ Wybierz termin rozmowy na bezpiecznej stronie: ${resultUrl}
 
 Na rozmowie sprawdzimy ostateczne dopasowanie i omówimy Twój cel na pierwsze 90 dni.
 
-Krystian`,
+Krystian
+
+${textFooter}`,
   };
 }
 
