@@ -1,4 +1,6 @@
-import { finalCta } from "@/content/landing";
+import Link from "next/link";
+import { finalCta, protocolBridge } from "@/content/landing";
+import { site } from "@/lib/site";
 import { CtaButton } from "./CtaButton";
 
 /**
@@ -40,6 +42,19 @@ export function FinalCtaSection() {
 
         <p className="mx-auto mt-6 max-w-[62ch] text-[13px] leading-relaxed text-tcs-text-muted sm:text-sm">
           {finalCta.microcopy}
+        </p>
+
+        {/* Zejście do Protokołu — pod microcopy i bez stylu przycisku, żeby nie
+            konkurowało z aplikacją (patrz `protocolBridge` w treściach). */}
+        <p className="mt-10 border-t border-tcs-border/60 pt-8 text-[14px] leading-relaxed text-tcs-text-muted">
+          {protocolBridge.question}{" "}
+          <Link
+            href={site.routes.reset}
+            className="font-semibold text-tcs-gold underline decoration-tcs-gold/40 underline-offset-4 transition-colors hover:text-tcs-gold-hover hover:decoration-tcs-gold-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-tcs-blue focus-visible:ring-offset-[3px] focus-visible:ring-offset-tcs-bg-alt"
+          >
+            {protocolBridge.linkLabel}
+          </Link>
+          .
         </p>
       </div>
     </section>

@@ -96,11 +96,17 @@ Krystian`,
 }
 
 /**
- * AC4 — Not Qualified. Zgodnie z Z1 i Z2: bez score, bez progu, bez powodu
- * i BEZ jakiegokolwiek CTA — także bez kierowania na Protokół Resetu.
+ * AC4 — Not Qualified. Bez score, progu i powodu decyzji (Z2).
+ *
+ * Główna treść jest 1:1 z briefu. PS z Protokołem Resetu to ODSTĘPSTWO od Z1
+ * („CTA: brak", zakaz kierowania do tańszego produktu) na decyzję właściciela
+ * z 2026-08-15 — bez tego kandydat zamykający kartę zostaje bez żadnego wyjścia.
+ * Świadomie jako PS pod podpisem, a nie przycisk: to nie ma być sprzedaż
+ * doklejona do odmowy.
  */
 export function notQualifiedTemplate(firstName: string) {
   const name = esc(firstName);
+  const resetUrl = `${site.url}${site.routes.reset}`;
   return {
     subject: "Dziękuję za aplikację",
     html: emailLayout(`
@@ -111,6 +117,10 @@ export function notQualifiedTemplate(firstName: string) {
           "wyłącznie brak wystarczającego dopasowania do tego formatu na ten moment.",
       )}
       ${signature(false)}
+      <p style="margin:24px 0 0;color:#808791 !important;line-height:1.7;font-size:14px;">
+        PS Jeżeli chcesz zacząć od czegoś konkretnego już teraz, odbierz bezpłatny
+        <a href="${resetUrl}" style="color:#5b9eff !important;">7-dniowy Protokół Resetu</a>.
+      </p>
     `),
     text: `Cześć ${firstName},
 
@@ -118,7 +128,10 @@ dziękuję za konkretne odpowiedzi. Na podstawie obecnej aplikacji nie przechodz
 The Control System 1 na 1 jest procesem dla wąskiej grupy osób; ta decyzja oznacza wyłącznie brak
 wystarczającego dopasowania do tego formatu na ten moment.
 
-Krystian`,
+Krystian
+
+PS Jeżeli chcesz zacząć od czegoś konkretnego już teraz, odbierz bezpłatny 7-dniowy Protokół Resetu:
+${resetUrl}`,
   };
 }
 

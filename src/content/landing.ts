@@ -151,6 +151,22 @@ export const finalCta = {
     "Krótka aplikacja kwalifikacyjna. Jeśli zobaczymy dopasowanie, przejdziesz do wyboru terminu rozmowy online 1 na 1. Samo wypełnienie aplikacji nie gwarantuje rozmowy ani przyjęcia do programu.",
 } as const;
 
+/**
+ * Zejście do Protokołu Resetu pod finalnym CTA.
+ *
+ * ODSTĘPSTWO OD BRIEFU, decyzja właściciela z 2026-08-15: sekcja G4 wyklucza
+ * „darmowy protokół" z landingu, a G1 pilnuje jednej decyzji. Właściciel
+ * przesądził, że /reset nie jest osobnym landingiem kampanijnym, więc musi mieć
+ * wejście ze strony głównej.
+ *
+ * Celowo zwykły link, nie drugi przycisk: aplikacja zostaje jedyną dominującą
+ * decyzją, a to jest wyjście dla osób, które nie są na nią gotowe.
+ */
+export const protocolBridge = {
+  question: "Nie czujesz się jeszcze gotowy na proces 1 na 1?",
+  linkLabel: "Zacznij od bezpłatnego 7-dniowego Protokołu Resetu",
+} as const;
+
 /** Sekcja S — footer. Oba disclaimery: DO FINALNEJ WERYFIKACJI PRAWNEJ. */
 export const footer = {
   role: "Krystian Ćwik · Twórca The Control System",
