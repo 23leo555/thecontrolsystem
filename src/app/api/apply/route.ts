@@ -25,6 +25,24 @@ import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 
+/**
+ * Etapy lejka, które kolejny submit może nadpisać.
+ *
+ * Wszystko poza tą listą — MANUAL_APPROVED, CALL_BOOKED, CALL_CANCELED,
+ * CALL_COMPLETED, NO_SHOW, FOLLOW_UP, CLIENT, LOST — oznacza, że leadem
+ * zajmuje się już człowiek albo Calendly. Automat nie ma prawa cofać takiego
+ * stanu do wyniku scoringu.
+ */
+const OVERWRITABLE_LIFECYCLE = [
+  "NEW_LEAD",
+  "PROTOCOL_DOWNLOADED",
+  "APPLICATION_STARTED",
+  "APPLICATION_COMPLETED",
+  "QUALIFIED",
+  "MANUAL_REVIEW",
+  "NOT_QUALIFIED",
+];
+
 const saveFailed = () =>
   NextResponse.json(
     { errors: { form: "Nie udało się zapisać aplikacji. Spróbuj ponownie za chwilę." } },
@@ -282,8 +300,18 @@ async function dispatchEmails(args: {
     await log("apply_owner_notification", await sendEmail({ to: process.env.OWNER_EMAIL ?? site.ownerEmail, ...owner }));
 
     // Lifecycle leada trzyma stan lejka dla panelu i raportów (AB1).
+    //
+    // Aktualizujemy go WYŁĄCZNIE, gdy lead jest jeszcze na wczesnym etapie.
+    // Ktoś, kto ma już zarezerwowaną rozmowę albo jest klientem, nie może
+    // wrócić do „w analizie" tylko dlatego, że wysłał drugą aplikację —
+    // a dokładnie to wydarzyło się 2026-08-15: rezerwacja o 09:46:23 została
+    // nadpisana przez kolejny submit 12 sekund później.
     if (args.leadId) {
-      await db.from("leads").update({ lifecycle_status: args.status }).eq("id", args.leadId);
+      await db
+        .from("leads")
+        .update({ lifecycle_status: args.status })
+        .eq("id", args.leadId)
+        .in("lifecycle_status", OVERWRITABLE_LIFECYCLE);
     }
   } catch (err) {
     // Świadomie połykamy — zgłoszenie jest zapisane, poczta nie może go cofnąć.
