@@ -39,9 +39,16 @@ function answerLabel(id: QuestionId, answers: Answers): string {
   return getQuestion(id).options?.find((o) => o.value === raw)?.label ?? raw;
 }
 
-/** AC2 — Qualified. Link prowadzi na podpisaną stronę wyniku, nie wprost do Calendly (AA1). */
+/**
+ * AC2 — Qualified. Link prowadzi na podpisaną stronę wyniku, nie wprost do Calendly (AA1).
+ *
+ * PS z Protokołem dołożone na decyzję właściciela z 2026-08-15, tak samo jak na
+ * ekranie wyniku. Świadomie pod podpisem i bez przycisku: jedynym celem tej
+ * wiadomości pozostaje rezerwacja terminu.
+ */
 export function qualifiedTemplate(firstName: string, resultUrl: string) {
   const name = esc(firstName);
+  const resetUrl = `${site.url}${site.routes.reset}`;
   return {
     subject: "Twój kolejny krok w The Control System",
     html: emailLayout(`
@@ -57,6 +64,10 @@ export function qualifiedTemplate(firstName: string, resultUrl: string) {
           "zobowiązania do zakupu.",
       )}
       ${signature(true)}
+      <p style="margin:24px 0 0;color:#808791 !important;line-height:1.7;font-size:14px;">
+        PS Zanim porozmawiamy, możesz zacząć od bezpłatnego
+        <a href="${resetUrl}" style="color:#5b9eff !important;">7-dniowego Protokołu Resetu</a>.
+      </p>
     `),
     text: `Cześć ${firstName},
 
@@ -67,7 +78,10 @@ Podczas rozmowy omówimy Twoją sytuację, cel na pierwsze 90 dni i ostateczne d
 Zakwalifikowanie do rozmowy nie oznacza automatycznego przyjęcia do programu ani zobowiązania do zakupu.
 
 Krystian Ćwik
-Twórca The Control System`,
+Twórca The Control System
+
+PS Zanim porozmawiamy, możesz zacząć od bezpłatnego 7-dniowego Protokołu Resetu:
+${resetUrl}`,
   };
 }
 

@@ -26,6 +26,10 @@ describe("szablony e-mail lejka /apply", () => {
     expect(tpl.subject).toBe("Twój kolejny krok w The Control System");
     expect(tpl.html).toContain(url);
     expect(tpl.text).toContain(url);
+    // PS z Protokołem — decyzja właściciela, ale rezerwacja zostaje głównym celem,
+    // więc link do /reset musi stać ZA linkiem do strony wyniku.
+    expect(tpl.text).toContain("/reset");
+    expect(tpl.text.indexOf(url)).toBeLessThan(tpl.text.indexOf("/reset"));
   });
 
   it("wiadomość Manual Review nie zawiera żadnego linku (AC3)", () => {
