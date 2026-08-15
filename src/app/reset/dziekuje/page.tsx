@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { ResetHeader, ResetFooter } from "@/components/reset/ResetChrome";
 import { PageViewTracker } from "@/components/landing/PageViewTracker";
-import { DownloadButton } from "@/components/reset/DownloadButton";
+import { ResendSection } from "@/components/reset/ResendSection";
 import { ButtonLink } from "@/components/ui/Button";
 import { resetCopy } from "@/content/reset";
 import { site } from "@/lib/site";
+import { verifyDeliveryToken, deliveryCookie } from "@/lib/resendToken";
 
 const c = resetCopy.thanks;
 
@@ -20,7 +22,11 @@ export const metadata: Metadata = {
  * Bez VSL, bez Calendly, bez automatycznego przekierowania do sprzedaży.
  * Bridge do /system jest dyskretny i ukryty do czasu publikacji tamtej strony.
  */
-export default function ResetThanksPage() {
+export default async function ResetThanksPage() {
+  const cookieStore = await cookies();
+  const hasDeliveryContext =
+    verifyDeliveryToken(cookieStore.get(deliveryCookie.name)?.value) !== null;
+
   return (
     <>
       <PageViewTracker event="reset_thankyou_view" />
@@ -47,12 +53,27 @@ export default function ResetThanksPage() {
           <h1 className="mt-6 text-display-md">{c.h1}</h1>
           <p className="mt-4 text-text-secondary">{c.body}</p>
 
-          <div className="mt-8 rounded-2xl border border-border bg-surface/80 p-5 shadow-card sm:p-6">
-            <DownloadButton href="/protokol-resetu.pdf" label={c.cta} />
-            <p className="mt-3 text-center text-xs text-text-secondary/80">
-              Jeśli wiadomość nie dotarła w ciągu kilku minut, sprawdź folder spam lub „Oferty”.
-            </p>
+          {/* Bez pobierania PDF-a: Protokół dostarczamy wyłącznie e-mailem
+              (decyzja właściciela z 2026-08-15). Zostaje wskazówka, gdzie szukać
+              wiadomości, i możliwość ponownej wysyłki poniżej. */}
+          <div className="mt-8 flex items-start gap-3 rounded-2xl border border-border bg-surface/80 p-5 shadow-card sm:p-6">
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="mt-0.5 h-5 w-5 shrink-0 text-text-secondary"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+              <path d="M3 7l9 6 9-6" />
+            </svg>
+            <p className="text-sm leading-relaxed text-text-secondary">{c.inboxHint}</p>
           </div>
+
+          <ResendSection hasContext={hasDeliveryContext} />
 
           {/* Bridge do pełnej usługi — nie jest głównym CTA tej strony. */}
           {site.systemPageLive && (

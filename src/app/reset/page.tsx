@@ -94,25 +94,8 @@ export default function ResetPage() {
               </div>
 
               {/* C — mockup Protokołu */}
-              <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:pt-4">
+              <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-4">
                 <ProtocolMockup priority />
-              </div>
-
-              {/* D — 3 krótkie korzyści + mikrocopy */}
-              <div className="lg:col-start-1 lg:row-start-3 lg:mt-10">
-                <ul className="grid gap-5 sm:grid-cols-3">
-                  {c.hero.benefits.map((b) => (
-                    <li key={b.no}>
-                      <span className="font-display text-xs font-bold tracking-[0.18em] tabular-nums text-primary-glow">
-                        {b.no}
-                      </span>
-                      <h2 className="mt-2 font-display text-sm font-bold">{b.title}</h2>
-                      <p className="mt-1.5 text-sm text-text-secondary">{b.body}</p>
-                    </li>
-                  ))}
-                </ul>
-
-                <p className="mt-6 text-sm text-text-secondary/80">{c.hero.microcopy}</p>
               </div>
             </div>
           </div>

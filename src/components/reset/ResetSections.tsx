@@ -11,11 +11,11 @@ export function NotEbookSection() {
   const c = resetCopy.notEbook;
   return (
     <section className="tcs-container py-16 sm:py-20" aria-labelledby="not-ebook-title">
-      <div className="max-w-prose">
+      <div className="max-w-prose lg:max-w-[60rem]">
         <h2 id="not-ebook-title" className="text-display-sm sm:text-display-md">
           {c.h2}
         </h2>
-        <p className="mt-5 text-text-secondary">{c.body}</p>
+        <p className="mt-5 max-w-prose text-text-secondary">{c.body}</p>
       </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -43,7 +43,7 @@ export function SevenDaysSection() {
       aria-labelledby="seven-days-title"
     >
       <div className="tcs-container">
-        <h2 id="seven-days-title" className="text-display-sm sm:text-display-md">
+        <h2 id="seven-days-title" className="text-display-sm sm:text-display-md lg:text-center">
           {c.h2}
         </h2>
 
@@ -70,12 +70,12 @@ export function ForWhomSection() {
   const c = resetCopy.forWhom;
   return (
     <section className="tcs-container py-16 sm:py-20" aria-labelledby="for-whom-title">
-      <div className="max-w-prose">
+      <div className="max-w-prose lg:max-w-[60rem]">
         <h2 id="for-whom-title" className="text-display-sm sm:text-display-md">
           {c.h2}
         </h2>
 
-        <ul className="mt-8 space-y-3">
+        <ul className="mt-8 max-w-prose space-y-3">
           {c.items.map((item) => (
             <li key={item} className="flex items-start gap-3 text-text-secondary">
               <svg

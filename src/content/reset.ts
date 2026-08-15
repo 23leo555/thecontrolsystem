@@ -15,24 +15,6 @@ export const resetCopy = {
       "Odzyskaj pierwszy punkt kontroli nad energią, ciałem i codziennym funkcjonowaniem w ciągu najbliższych 7 dni.",
     support:
       "Praktyczny protokół dla zapracowanych mężczyzn, którzy nie potrzebują kolejnej teorii, tylko prostego systemu do wykonania.",
-    benefits: [
-      {
-        no: "01",
-        title: "UPORZĄDKUJ FUNDAMENTY",
-        body: "Sen, poranek, nawodnienie, jedzenie, ruch, trening i wieczór.",
-      },
-      {
-        no: "02",
-        title: "WIEDZ, CO ROBIĆ",
-        body: "Każdy dzień mówi Ci dokładnie co zrobić, kiedy i dlaczego.",
-      },
-      {
-        no: "03",
-        title: "DZIAŁAJ TAKŻE W TRUDNY DZIEŃ",
-        body: "Najważniejsze działania mają również wersję minimum.",
-      },
-    ],
-    microcopy: "Około kilku minut planowania dziennie. Bez perfekcji. Bez rewolucji.",
   },
 
   notEbook: {
@@ -111,9 +93,21 @@ export const resetCopy = {
   },
 
   thanks: {
-    h1: "GOTOWE. TWÓJ PROTOKÓŁ JEST JUŻ W DRODZE.",
-    body: "Wysłałem go również na podany adres email. Zacznij od Dnia 1 i nie próbuj wdrażać całego tygodnia jednocześnie.",
-    cta: "POBIERZ PROTOKÓŁ TERAZ",
+    h1: "GOTOWE. PROTOKÓŁ JEST W DRODZE NA TWÓJ E-MAIL.",
+    /**
+     * Od 2026-08-15 (decyzja właściciela) Protokół wychodzi WYŁĄCZNIE e-mailem —
+     * ta strona nie daje już pobrania PDF-a. Dzięki temu adres musi być
+     * poprawny, a kontakt zaczyna się od pierwszej wiadomości w skrzynce.
+     */
+    body: "Wysłałem 7-dniowy Protokół Resetu na podany adres e-mail. Sprawdź skrzynkę za kilka minut i zacznij od Dnia 1 — nie próbuj wdrażać całego tygodnia jednocześnie.",
+    inboxHint: "Jeśli wiadomość nie dotarła w ciągu kilku minut, sprawdź folder spam lub „Oferty”.",
+    resend: {
+      prompt: "Wiadomość nie dotarła?",
+      cta: "WYŚLIJ PROTOKÓŁ PONOWNIE",
+      ctaLoading: "WYSYŁAM…",
+      success: "Wiadomość została wysłana ponownie. Sprawdź skrzynkę za kilka minut.",
+      error: "Nie udało się ponownie wysłać wiadomości. Odczekaj chwilę i spróbuj ponownie.",
+    },
     /** Bridge do /system — ukryty do czasu publikacji strony usługi (brief sekcja 16). */
     bridge: {
       h2: "Wiesz już, że potrzebujesz czegoś więcej niż uniwersalnego Protokołu?",

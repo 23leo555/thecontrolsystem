@@ -5,6 +5,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
 import { sendEmail, protocolDeliveryTemplate } from "@/lib/email";
 import { site } from "@/lib/site";
+import { signDeliveryToken, deliveryCookie } from "@/lib/resendToken";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,5 +165,21 @@ export async function POST(req: NextRequest) {
       .eq("id", lead.id);
   }
 
-  return NextResponse.json({ ok: true, emailSent: emailOk });
+  const response = NextResponse.json({ ok: true, emailSent: emailOk });
+
+  // Kontekst ponownej wysyłki (brief resendu, sekcja 9.1) — wyłącznie id leada,
+  // podpisane HMAC-em. Bez sekretu w env po prostu nie wystawiamy cookie:
+  // resend wtedy pokaże stan „brak kontekstu", zamiast wywalić 500.
+  const token = signDeliveryToken(lead.id);
+  if (token) {
+    response.cookies.set(deliveryCookie.name, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: deliveryCookie.maxAgeSec,
+      path: "/",
+    });
+  }
+
+  return response;
 }
