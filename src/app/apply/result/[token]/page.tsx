@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import crypto from "node:crypto";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase";
+import { verifyResultToken } from "@/lib/apply/resultToken";
 import { site } from "@/lib/site";
 import {
   resultQualified,
@@ -29,30 +29,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type Status = "QUALIFIED" | "MANUAL_REVIEW" | "NOT_QUALIFIED";
-
-function verifyToken(token: string): { applicationId: string } | null {
-  const secret = process.env.APPLY_RESULT_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  const [payloadB64, sig] = token.split(".");
-  if (!payloadB64 || !sig) return null;
-
-  let payload: string;
-  try {
-    payload = Buffer.from(payloadB64, "base64url").toString("utf8");
-  } catch {
-    return null;
-  }
-
-  const expected = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
-  // Porównanie w stałym czasie — token jest sekretem dostępowym.
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-
-  const [applicationId, expiresAt] = payload.split(".");
-  if (!applicationId || Number(expiresAt) < Date.now()) return null;
-
-  return { applicationId };
-}
 
 async function readStatus(applicationId: string): Promise<Status | null> {
   try {
@@ -109,7 +85,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 export default async function ResultPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const verified = verifyToken(token);
+  const verified = verifyResultToken(token);
 
   if (!verified) {
     return (

@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/admin/LeadsTable";
 
+/** Statusy lejka /apply (brief W2). Stary lejek używa A/B/C. */
+type StatusV1 = "DRAFT" | "QUALIFIED" | "MANUAL_REVIEW" | "NOT_QUALIFIED";
+
 interface Detail {
   id: string;
   submitted_at: string | null;
@@ -11,6 +14,11 @@ interface Detail {
   qualification_status: "A" | "B" | "C" | null;
   hard_rule_reason: string | null;
   cap_reason: string | null;
+  /** Poniżej model z briefu v1.0 — wypełniony tylko dla zgłoszeń z /apply. */
+  is_v1: boolean;
+  status: StatusV1 | null;
+  hard_gate: string | null;
+  caps: string[] | null;
   manual_decision: string | null;
   manual_decided_at: string | null;
   booking_token_expires_at: string | null;
@@ -124,7 +132,11 @@ export function ApplicationDetail({
               <div>
                 <div className="flex items-center gap-3">
                   <h2 className="text-xl font-bold">{detail.leads.first_name}</h2>
-                  <StatusBadge status={detail.qualification_status} />
+                  {detail.is_v1 ? (
+                    <StatusV1Badge status={detail.status} />
+                  ) : (
+                    <StatusBadge status={detail.qualification_status} />
+                  )}
                 </div>
                 <p className="mt-1 text-sm text-text-secondary">
                   {detail.leads.email}
@@ -144,12 +156,18 @@ export function ApplicationDetail({
             {/* Dane systemowe — niewidoczne dla klienta */}
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <Stat label="Score" value={detail.score !== null ? `${detail.score}/100` : "—"} />
-              <Stat label="Cap" value={detail.cap_reason ?? "—"} />
-              <Stat label="Hard rule" value={detail.hard_rule_reason ?? "—"} />
+              <Stat
+                label={detail.is_v1 ? "Capy" : "Cap"}
+                value={detail.is_v1 ? (detail.caps?.length ? detail.caps.join(", ") : "—") : (detail.cap_reason ?? "—")}
+              />
+              <Stat
+                label="Hard gate"
+                value={detail.is_v1 ? (detail.hard_gate ?? "—") : (detail.hard_rule_reason ?? "—")}
+              />
             </div>
 
-            {/* Decyzje — tylko dla Statusu B */}
-            {detail.qualification_status === "B" && (
+            {/* Decyzje — Manual Review w obu modelach */}
+            {(detail.is_v1 ? detail.status === "MANUAL_REVIEW" : detail.qualification_status === "B") && (
               <div className="mt-6 rounded-xl border border-warning/40 bg-warning/10 p-4">
                 <p className="mb-3 text-sm font-semibold">Decyzja ręczna</p>
                 <div className="flex flex-wrap gap-3">
@@ -179,16 +197,20 @@ export function ApplicationDetail({
               </div>
             )}
 
-            {/* Ponowne zaproszenie — gdy token wygasł lub e-mail nie dotarł */}
-            {(detail.qualification_status === "A" || detail.manual_decision === "approved") && (
+            {/* Ponowne zaproszenie — gdy link wygasł lub e-mail nie dotarł */}
+            {(detail.is_v1
+              ? detail.status === "QUALIFIED"
+              : detail.qualification_status === "A" || detail.manual_decision === "approved") && (
               <div className="mt-6 rounded-xl border border-border bg-surface p-4">
                 <p className="mb-2 text-sm font-semibold">Zaproszenie do rezerwacji</p>
                 <p className="mb-3 text-xs text-text-secondary">
-                  {detail.booking_token_used_at
-                    ? "Token wykorzystany."
-                    : detail.booking_token_expires_at
-                      ? `Ważny do ${new Date(detail.booking_token_expires_at).toLocaleString("pl-PL")}`
-                      : "Brak aktywnego tokenu."}
+                  {detail.is_v1
+                    ? "Link do strony wyniku jest ważny 7 dni od wysłania. Ponowna wysyłka generuje nowy."
+                    : detail.booking_token_used_at
+                      ? "Token wykorzystany."
+                      : detail.booking_token_expires_at
+                        ? `Ważny do ${new Date(detail.booking_token_expires_at).toLocaleString("pl-PL")}`
+                        : "Brak aktywnego tokenu."}
                 </p>
                 <Button
                   size="md"
@@ -249,6 +271,25 @@ export function ApplicationDetail({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Status lejka /apply. Kolory niosą tę samą informację co tekst, więc etykieta
+ * jest zawsze wypisana słownie — panel bywa czytany na telefonie w słońcu.
+ */
+function StatusV1Badge({ status }: { status: StatusV1 | null }) {
+  const map: Record<StatusV1, { label: string; cls: string }> = {
+    QUALIFIED: { label: "QUALIFIED", cls: "border-success/40 bg-success/10 text-success" },
+    MANUAL_REVIEW: { label: "MANUAL REVIEW", cls: "border-warning/40 bg-warning/10 text-warning" },
+    NOT_QUALIFIED: { label: "NOT QUALIFIED", cls: "border-border bg-surface text-text-secondary" },
+    DRAFT: { label: "DRAFT", cls: "border-border bg-surface text-text-secondary" },
+  };
+  const s = status ? map[status] : null;
+  if (!s) return null;
+
+  return (
+    <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${s.cls}`}>{s.label}</span>
   );
 }
 

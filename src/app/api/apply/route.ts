@@ -4,6 +4,7 @@ import { validateApplication } from "@/lib/apply/validation";
 import { evaluate, type Status } from "@/lib/apply/scoring";
 import type { Answers } from "@/lib/apply/questions";
 import { supabaseAdmin } from "@/lib/supabase";
+import { resultPath } from "@/lib/apply/resultToken";
 import { sendEmail } from "@/lib/email";
 import {
   qualifiedTemplate,
@@ -23,19 +24,6 @@ import { site } from "@/lib/site";
  */
 
 export const runtime = "nodejs";
-
-/** Token wyniku ważny 7 dni (X2). */
-const RESULT_TTL_DAYS = 7;
-
-function signResultToken(applicationId: string, expiresAt: number): string {
-  const secret = process.env.APPLY_RESULT_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  const payload = `${applicationId}.${expiresAt}`;
-  const sig = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
-  return `${Buffer.from(payload).toString("base64url")}.${sig}`;
-}
-
-const resultPath = (applicationId: string) =>
-  `/apply/result/${signResultToken(applicationId, Date.now() + RESULT_TTL_DAYS * 24 * 60 * 60 * 1000)}`;
 
 const saveFailed = () =>
   NextResponse.json(
