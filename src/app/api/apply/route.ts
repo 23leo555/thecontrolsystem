@@ -49,7 +49,10 @@ export async function POST(request: Request) {
 
   try {
     const db = supabaseAdmin();
-    await db.from("applications").upsert(
+    // UWAGA: klient Supabase NIE rzuca wyjątkiem przy błędzie bazy — zwraca go
+    // w polu `error`. Bez tego sprawdzenia nieudany zapis przechodzi bezszelestnie
+    // i aplikacja kandydata przepada.
+    const { error } = await db.from("applications").upsert(
       {
         id: applicationId,
         // Kolumna nazywa się answers_json — nazwa jest z pierwotnego schematu.
@@ -69,9 +72,27 @@ export async function POST(request: Request) {
       },
       { onConflict: "idempotency_key" }
     );
+
+    if (error) {
+      console.error("[apply] zapis aplikacji nie powiódł się", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        applicationId,
+      });
+      // Zgłoszenie kandydata jest zbyt cenne, żeby zniknąć po cichu.
+      // Lepiej poprosić o ponowienie niż udawać sukces.
+      return NextResponse.json(
+        { errors: { form: "Nie udało się zapisać aplikacji. Spróbuj ponownie za chwilę." } },
+        { status: 503 }
+      );
+    }
   } catch (err) {
-    // Utrata zapisu nie może zabrać użytkownikowi wyniku, ale musi być widoczna w logach.
-    console.error("[apply] zapis aplikacji nie powiódł się", err);
+    console.error("[apply] wyjątek przy zapisie aplikacji", err);
+    return NextResponse.json(
+      { errors: { form: "Nie udało się zapisać aplikacji. Spróbuj ponownie za chwilę." } },
+      { status: 503 }
+    );
   }
 
   const expiresAt = Date.now() + RESULT_TTL_DAYS * 24 * 60 * 60 * 1000;

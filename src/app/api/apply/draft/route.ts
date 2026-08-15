@@ -22,13 +22,15 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => ({}))) as { source?: unknown };
     const db = supabaseAdmin();
     // lead_id zostaje puste — draft jest anonimowy do czasu submitu (T4).
-    await db.from("applications").insert({
+    // Klient Supabase zwraca błąd w polu `error`, nie rzuca wyjątkiem.
+    const { error } = await db.from("applications").insert({
       id: applicationId,
       status: "DRAFT",
       is_draft: true,
       source_snapshot: body.source ?? {},
       started_at: new Date().toISOString(),
     });
+    if (error) console.error("[apply/draft] nie udało się utworzyć draftu", error.message);
   } catch (err) {
     // Brak draftu nie może zablokować wypełniania — submit i tak utworzy rekord.
     console.error("[apply/draft] nie udało się utworzyć draftu", err);
@@ -44,11 +46,12 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
     const db = supabaseAdmin();
-    await db
+    const { error } = await db
       .from("applications")
       .update({ last_step: body.step, updated_at: new Date().toISOString() })
       .eq("id", body.applicationId)
       .eq("is_draft", true);
+    if (error) console.error("[apply/draft] nie udało się zapisać postępu", error.message);
   } catch (err) {
     console.error("[apply/draft] nie udało się zapisać postępu", err);
   }
