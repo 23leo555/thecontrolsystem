@@ -5,6 +5,7 @@ import { evaluate, type Status } from "@/lib/apply/scoring";
 import type { Answers } from "@/lib/apply/questions";
 import { supabaseAdmin } from "@/lib/supabase";
 import { resultPath } from "@/lib/apply/resultToken";
+import { retentionUntil } from "@/lib/crm/consent";
 import { sendEmail } from "@/lib/email";
 import {
   qualifiedTemplate,
@@ -230,10 +231,27 @@ async function upsertLead(answers: Answers, source: Record<string, unknown>): Pr
     const lead = Array.isArray(data) ? (data[0] as { id?: string } | undefined) : undefined;
     if (!lead?.id) return null;
 
-    // Telefon jest wymagany w tym formularzu (U15), a `upsert_lead` go nie przyjmuje.
-    if (typeof answers.phone === "string" && answers.phone) {
-      await db.from("leads").update({ phone_e164: answers.phone }).eq("id", lead.id);
-    }
+    // `upsert_lead` nie przyjmuje telefonu ani pól modelu CRM (F1, F2) —
+    // dopisujemy je osobno. Nazwisko bierzemy z odpowiedzi U13: lejek aplikacji
+    // zbiera je, a lejek Protokołu nie, więc powrót po Protokole go nie skasuje
+    // (trigger w bazie chroni przed nadpisaniem pustą wartością).
+    await db
+      .from("leads")
+      .update({
+        phone_e164: typeof answers.phone === "string" && answers.phone ? answers.phone : null,
+        last_name: name.last || null,
+        funnel_origin: "qualification_call",
+        first_touch_at: new Date().toISOString(),
+        latest_touch_at: new Date().toISOString(),
+        first_landing_page: str("landing_path") ?? "/apply",
+        latest_landing_page: str("landing_path") ?? "/apply",
+        conversion_utm_source: str("utm_source"),
+        conversion_utm_campaign: str("utm_campaign"),
+        conversion_at: new Date().toISOString(),
+        // Kandydat po aplikacji: dłuższa retencja, bo trwa proces sprzedażowy.
+        data_retention_until: retentionUntil({ hasMarketingConsent: false, isApplicant: true }),
+      })
+      .eq("id", lead.id);
 
     return lead.id;
   } catch (err) {

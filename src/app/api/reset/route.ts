@@ -5,6 +5,8 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
 import { sendEmail, protocolDeliveryTemplate, resetLeadOwnerTemplate } from "@/lib/email";
 import { site } from "@/lib/site";
+import { resetCopy } from "@/content/reset";
+import { recordConsents, retentionUntil } from "@/lib/crm/consent";
 import { signDeliveryToken, deliveryCookie } from "@/lib/resendToken";
 
 export const runtime = "nodejs";
@@ -130,7 +132,10 @@ export async function POST(req: NextRequest) {
   // formularz zbierał wyłącznie imię i e-mail), więc dopisujemy je osobno.
   // Nieudany zapis nie może przerwać wysyłki Protokołu — lead jest już w bazie.
   if (lead?.id) {
+    const marketingConsent = body.marketingConsent === true;
     const phoneConsent = body.phoneConsent === true;
+    const emailVersion = body.consentVersion ?? site.consentVersion;
+    const phoneVersion = body.phoneConsentVersion ?? site.phoneConsentVersion;
 
     const { error: phoneError } = await db
       .from("leads")
@@ -141,12 +146,46 @@ export async function POST(req: NextRequest) {
         // kiedy i na jakiej treści go dokonał.
         phone_consent: phoneConsent,
         phone_consent_at: phoneConsent ? new Date().toISOString() : null,
-        phone_consent_version: phoneConsent
-          ? (body.phoneConsentVersion ?? site.phoneConsentVersion)
-          : null,
+        phone_consent_version: phoneConsent ? phoneVersion : null,
+        // Model CRM (F1, F2): lejek, atrybucja i termin retencji ustawiane przy
+        // pierwszym zapisie. first_* chroni trigger w bazie, więc powrót tej
+        // samej osoby nie nadpisze pierwotnego źródła.
+        funnel_origin: "protocol_download",
+        first_touch_at: new Date().toISOString(),
+        latest_touch_at: new Date().toISOString(),
+        first_landing_page: src.landing_path ?? "/reset",
+        latest_landing_page: src.landing_path ?? "/reset",
+        conversion_utm_source: src.utm_source ?? null,
+        conversion_utm_campaign: src.utm_campaign ?? null,
+        conversion_at: new Date().toISOString(),
+        lead_status: "new",
+        data_retention_until: retentionUntil({ hasMarketingConsent: marketingConsent }),
       })
       .eq("id", lead.id);
     if (phoneError) console.error("[/api/reset] zapis telefonu/zgody nieudany:", phoneError.message);
+
+    // Rejestr dowodowy (F3) — osobny wpis per kanał, ze skrótem dokładnej treści.
+    // Zapisujemy także odmowy: brak zgody to również fakt, który trzeba wykazać.
+    await recordConsents({
+      leadId: lead.id,
+      sourcePage: src.landing_path ?? "/reset",
+      formId: "reset_protocol_form",
+      privacyNoticeVersion: emailVersion,
+      entries: [
+        {
+          type: "marketing_email",
+          status: marketingConsent ? "granted" : "denied",
+          version: emailVersion,
+          text: resetCopy.form.marketingConsent,
+        },
+        {
+          type: "marketing_phone",
+          status: phoneConsent ? "granted" : "denied",
+          version: phoneVersion,
+          text: resetCopy.form.phoneConsent,
+        },
+      ],
+    });
   }
 
   if (upsertError || !lead) {
