@@ -7,6 +7,7 @@ import { site } from "@/lib/site";
 
 export type TemplateKey =
   | "protocol_delivery"
+  | "reset_lead_owner"
   | "reset_day_1" | "reset_day_2" | "reset_day_3" | "reset_day_4"
   | "reset_day_5" | "reset_day_6" | "reset_day_7"
   | "qualified_not_booked" | "qualified_reminder"
@@ -206,5 +207,75 @@ Twórca The Control System
 ${site.ownerEmail}
 Telefon: ${site.ownerPhoneDisplay}
 Instagram: ${site.instagram}`,
+  };
+}
+
+const escLead = (s: string) => s.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!);
+
+/**
+ * Powiadomienie właściciela o nowym leadzie z /reset — do tej pory leady lądowały
+ * wyłącznie w bazie i trzeba było zaglądać do panelu, żeby je zobaczyć. W
+ * przeciwieństwie do powiadomienia z /apply (ownerNotificationTemplate) tu nie
+ * ma score'u ani przesłanek do ukrywania danych: to jedyny cel tej wiadomości,
+ * więc e-mail i telefon idą wprost w treści.
+ */
+export function resetLeadOwnerTemplate(args: {
+  firstName: string;
+  email: string;
+  phone: string;
+  marketingConsent: boolean;
+  source: Record<string, string | undefined>;
+}) {
+  const when = new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" });
+  const src =
+    ["utm_source", "utm_medium", "utm_campaign", "referrer", "landing_path"]
+      .map((k) => (args.source[k] ? `${k}: ${args.source[k]}` : null))
+      .filter(Boolean)
+      .join(" · ") || "brak danych";
+
+  const panelUrl = `${site.url}/admin`;
+
+  const rows: Array<[string, string]> = [
+    ["IMIĘ", args.firstName],
+    ["E-MAIL", args.email],
+    ["TELEFON", args.phone],
+    ["ZGODA MARKETINGOWA", args.marketingConsent ? "tak" : "nie"],
+    ["DATA", when],
+    ["ŹRÓDŁO", src],
+  ];
+
+  const table = rows
+    .map(
+      ([k, v]) => `<tr>
+        <td style="padding:10px 12px;color:#4f76ff !important;font-size:12px;font-weight:700;
+                   letter-spacing:.08em;white-space:nowrap;vertical-align:top;">${k}</td>
+        <td style="padding:10px 12px;color:#f9fafc !important;font-size:13px;">${escLead(v)}</td>
+      </tr>`,
+    )
+    .join("");
+
+  return {
+    subject: `[TCS][Reset] Nowy lead: ${args.firstName}`,
+    html: emailLayout(`
+      <h1 style="margin:0 0 20px;font-size:22px;">${escLead(args.firstName)}</h1>
+      <table style="width:100%;border-collapse:collapse;margin:0 0 24px;background:#0a0e18 !important;
+                    border-radius:12px;overflow:hidden;">${table}</table>
+      <p style="margin:0 0 24px;">
+        <a href="mailto:${args.email}" style="display:inline-block;background:#4f76ff !important;color:#010205 !important;
+           text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;">NAPISZ DO NIEGO</a>
+      </p>
+      <p style="margin:0;color:#808791 !important;font-size:12px;">
+        Pełna historia zgłoszenia jest też w <a href="${panelUrl}" style="color:#5b9eff !important;">panelu</a>.
+      </p>
+    `),
+    text: `Nowy lead z Protokołu Resetu: ${args.firstName}
+
+E-mail: ${args.email}
+Telefon: ${args.phone}
+Zgoda marketingowa: ${args.marketingConsent ? "tak" : "nie"}
+Data: ${when}
+Źródło: ${src}
+
+Panel: ${panelUrl}`,
   };
 }

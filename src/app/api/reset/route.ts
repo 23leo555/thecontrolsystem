@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { isValidEmail, isValidFirstName, normalizeEmail, toE164 } from "@/lib/validation";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
-import { sendEmail, protocolDeliveryTemplate } from "@/lib/email";
+import { sendEmail, protocolDeliveryTemplate, resetLeadOwnerTemplate } from "@/lib/email";
 import { site } from "@/lib/site";
 import { signDeliveryToken, deliveryCookie } from "@/lib/resendToken";
 
@@ -151,7 +151,34 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // --- E-mail: best effort, nie blokuje sukcesu zapisu ---
+  // --- Powiadomienie właściciela: best effort, niezależne od maila do leada ---
+  // Do tej pory leady z /reset lądowały wyłącznie w bazie — trzeba było
+  // sprawdzać panel, żeby je zobaczyć. Ten mail trafia od razu do skrzynki.
+  const ownerTpl = resetLeadOwnerTemplate({
+    firstName,
+    email,
+    phone,
+    marketingConsent: body.marketingConsent === true,
+    source: src,
+  });
+  const ownerSent = await sendEmail({
+    to: process.env.OWNER_EMAIL ?? site.ownerEmail,
+    subject: ownerTpl.subject,
+    html: ownerTpl.html,
+    text: ownerTpl.text,
+  });
+  await db.from("email_events").insert({
+    lead_id: lead.id,
+    provider_message_id: ownerSent.messageId ?? null,
+    template_key: "reset_lead_owner",
+    event_type: ownerSent.ok ? "sent" : "bounced",
+    raw_event: ownerSent.ok ? null : { error: ownerSent.error },
+  });
+  if (!ownerSent.ok) {
+    console.error("[/api/reset] powiadomienie właściciela nieudane:", ownerSent.error);
+  }
+
+  // --- E-mail do leada: best effort, nie blokuje sukcesu zapisu ---
   let emailOk = false;
   if (!lead.email_bounced) {
     const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? site.url}/protokol-resetu.pdf`;
