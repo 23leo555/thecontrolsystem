@@ -4,9 +4,10 @@ import { useState } from "react";
 import { AdminGate, SignOutButton } from "@/components/admin/AdminGate";
 import { LeadsTable } from "@/components/admin/LeadsTable";
 import { CrmBoard } from "@/components/admin/CrmBoard";
+import { CrmDashboards } from "@/components/admin/CrmDashboards";
 import { Logo } from "@/components/ui/Logo";
 
-type Tab = "crm" | "leads";
+type Tab = "crm" | "dashboards" | "leads";
 
 /**
  * Panel: bramka logowania + dwie zakładki.
@@ -34,6 +35,7 @@ export function AdminApp() {
             {(
               [
                 ["crm", "CRM"],
+                ["dashboards", "Dashboardy"],
                 ["leads", "Baza leadów"],
               ] as const
             ).map(([key, label]) => (
@@ -55,7 +57,9 @@ export function AdminApp() {
           </div>
 
           <div className="mt-8">
-            {tab === "crm" ? <CrmBoard token={token} /> : <LeadsTable token={token} />}
+            {tab === "crm" && <CrmBoard token={token} />}
+            {tab === "dashboards" && <CrmDashboards token={token} />}
+            {tab === "leads" && <LeadsTable token={token} />}
           </div>
         </div>
       )}
