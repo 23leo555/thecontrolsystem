@@ -39,7 +39,7 @@ export function Hero() {
           {/* `break-words` (overflow-wrap: break-word) zabezpiecza „podporządkowywania"
               — przy 360/390 px słowo jest szersze niż kolumna i było obcinane przez
               overflow-hidden sekcji (brief hero, B3). Hyphens korzystają z lang="pl". */}
-          <h1 className="mt-6 hyphens-auto break-words text-[34px] font-extrabold leading-[1.06] tracking-[-0.02em] text-tcs-text sm:text-[44px] lg:text-[58px]">
+          <h1 className="mt-6 hyphens-auto break-words text-[28px] font-extrabold leading-[1.1] tracking-[-0.02em] text-tcs-text sm:text-[44px] lg:text-[58px]">
             {hero.headline}
           </h1>
 
