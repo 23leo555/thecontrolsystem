@@ -81,18 +81,24 @@ export const resetCopy = {
     phoneLabel: "Numer telefonu",
     phonePlaceholder: "600 000 000",
     phoneError: "Podaj poprawny numer telefonu.",
+    /**
+     * Wymagana od 2026-08-16 (decyzja właściciela) — patrz komentarz w ResetForm.
+     * Brief V2 (docs/landing-reset-v2.md) zakładał zgodę opcjonalną; ta decyzja
+     * go nadpisuje. Podbicie treści zgody nadal wymaga podbicia consentVersion.
+     */
     marketingConsent:
       "Chcę otrzymywać od Krystiana Ćwika / The Control System drogą elektroniczną dodatkowe materiały edukacyjne, wskazówki, informacje o The Control System oraz informacje handlowe na podany adres email. Wiem, że zgodę mogę wycofać w każdej chwili.",
+    marketingConsentError: "Zaznacz zgodę na kontakt mailowy, aby otrzymać Protokół.",
     /**
      * Osobna zgoda na kanał TELEFONICZNY (PKE art. 398 — wymagana uprzednia zgoda).
-     * Opcjonalna: brak zaznaczenia nie blokuje wysłania Protokołu, a jedynie
-     * zamyka drogę do kontaktu telefonicznego.
+     * Wymagana od 2026-08-16 (decyzja właściciela) — telefon jest polem
+     * obowiązkowym i ma służyć realnemu kontaktowi, nie tylko leżeć w bazie.
      */
     phoneConsent:
       "Zgadzam się na kontakt telefoniczny od Krystiana Ćwika / The Control System na podany numer, w tym połączenia i wiadomości SMS, w sprawie Protokołu Resetu oraz współpracy 1 na 1. Wiem, że zgodę mogę wycofać w każdej chwili.",
+    phoneConsentError: "Zaznacz zgodę na kontakt telefoniczny, aby otrzymać Protokół.",
     /** Wyjaśnienie przy polu telefonu — po co jest, skoro Protokół idzie mailem. */
-    phoneHelp:
-      "Numer wykorzystujemy do kontaktu w sprawie Twojego zgłoszenia. Dzwonimy wyłącznie do osób, które zaznaczyły zgodę poniżej.",
+    phoneHelp: "Numer wykorzystujemy do kontaktu w sprawie Twojego zgłoszenia.",
     /**
      * Klauzula informacyjna pod formularzem (brief sekcja 8).
      * NIE jest zgodą — nie ma checkboxa „akceptuję politykę prywatności".

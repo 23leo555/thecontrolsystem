@@ -31,8 +31,18 @@ i nie przechodzi WCAG AA dla tej wielkości; ciemny daje 5.3:1.
 
 **Brak checkboxa „akceptuję politykę prywatności"** — brief sekcja 8: polityka jest
 informacją, nie umową wymagającą zgody. Pod formularzem stoi klauzula informacyjna.
-Wymagana jest wyłącznie zgoda marketingowa i tylko wtedy, gdy użytkownik ją zaznaczy.
-`/api/reset` nie sprawdza już pola `consent`.
+To nadal aktualne — poniższy akapit o zgodach marketingowej/telefonicznej jest
+osobną sprawą.
+
+**Zgody marketingowa i telefoniczna są WYMAGANE od 2026-08-16 (decyzja właściciela).**
+Ten akapit zastępuje wcześniejszą wersję tej sekcji, w której obie zgody były
+opcjonalne, a `/api/reset` nie sprawdzało pola `consent` — to była świadoma decyzja
+w drugą stronę, uzasadniona potwierdzeniem prawnym z 2026-08-10 (patrz punkt 3
+niżej). Nowa decyzja ją nadpisuje: `/api/reset` teraz odrzuca submit (400) bez
+`marketingConsent === true` i `phoneConsent === true`, tak samo jak bez telefonu.
+Jeśli treść którejkolwiek zgody się zmieni, podbić `site.consentVersion` /
+`site.phoneConsentVersion` — inaczej w bazie nie da się wykazać, na jakiej wersji
+oparto starsze zgody.
 
 **Banner cookies** ma oba przyciski o tej samej wadze wizualnej (brak dark patternu)
 i nie konkuruje z głównym CTA.

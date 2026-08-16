@@ -74,10 +74,23 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  // Brief V2 sekcja 8: NIE wymagamy osobnej zgody na politykę prywatności.
-  // Podstawą przesłania Protokołu jest realizacja żądania użytkownika, a pod
-  // formularzem stoi klauzula informacyjna. Wymagana jest wyłącznie zgoda
-  // marketingowa — i tylko wtedy, gdy użytkownik sam ją zaznaczy.
+  // Obie zgody wymagane od 2026-08-16 (decyzja właściciela, nadpisuje brief V2
+  // sekcja 8, gdzie były opcjonalne). Walidacja klienta da się pominąć zwykłym
+  // curlem, więc serwer nie może ufać samej wartości z body bez sprawdzenia.
+  // Nadal NIE wymagamy osobnej zgody na politykę prywatności — to informacja,
+  // nie umowa wymagająca zgody.
+  if (body.marketingConsent !== true) {
+    return NextResponse.json(
+      { ok: false, field: "marketingConsent", error: "Zaznacz zgodę na kontakt mailowy, aby otrzymać Protokół." },
+      { status: 400 },
+    );
+  }
+  if (body.phoneConsent !== true) {
+    return NextResponse.json(
+      { ok: false, field: "phoneConsent", error: "Zaznacz zgodę na kontakt telefoniczny, aby otrzymać Protokół." },
+      { status: 400 },
+    );
+  }
 
   const turnstile = await verifyTurnstile(body.turnstileToken, ip);
   if (!turnstile.ok) {

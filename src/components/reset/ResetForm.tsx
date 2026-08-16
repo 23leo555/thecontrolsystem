@@ -17,9 +17,10 @@ const c = resetCopy.form;
  * Zasady, których nie wolno rozluźnić:
  * - trzy pola: imię, email i telefon (telefon obowiązkowy od 2026-08-15,
  *   decyzja właściciela; brief V2 sekcja 7 przewidywał tylko dwa),
- * - zgody są OSOBNE dla kanału e-mail i telefonicznego, domyślnie niezaznaczone,
- *   a brak którejkolwiek nie blokuje wysyłki Protokołu (PKE art. 398 wymaga
- *   uprzedniej zgody na kontakt telefoniczny — sam podany numer nią nie jest),
+ * - zgody są OSOBNE dla kanału e-mail i telefonicznego, obie WYMAGANE od
+ *   2026-08-16 (decyzja właściciela, nadpisuje brief V2 sekcja 8 — tam były
+ *   opcjonalne). Sam podany numer nadal nie jest zgodą na dzwonienie
+ *   (PKE art. 398 wymaga jawnej, uprzedniej zgody),
  * - nie ma checkboxa „akceptuję politykę prywatności" — polityka jest
  *   informacją, nie umową wymagającą zgody,
  * - błąd nie kasuje wpisanych danych,
@@ -31,13 +32,21 @@ export function ResetForm({ formId }: { formId: string }) {
   const nameId = `${uid}-name`;
   const emailId = `${uid}-email`;
   const phoneId = `${uid}-phone`;
+  const marketingConsentErrorId = `${uid}-marketing-consent-error`;
+  const phoneConsentErrorId = `${uid}-phone-consent-error`;
 
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [phoneConsent, setPhoneConsent] = useState(false);
-  const [touched, setTouched] = useState<{ firstName?: boolean; email?: boolean; phone?: boolean }>({});
+  const [touched, setTouched] = useState<{
+    firstName?: boolean;
+    email?: boolean;
+    phone?: boolean;
+    marketingConsent?: boolean;
+    phoneConsent?: boolean;
+  }>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -49,7 +58,8 @@ export function ResetForm({ formId }: { formId: string }) {
   // Ta sama normalizacja co po stronie serwera — użytkownik może wpisać numer
   // ze spacjami, z zerem albo z prefiksem, a i tak zapiszemy go w E.164.
   const phoneValid = toE164(phone) !== null;
-  const canSubmit = nameValid && emailValid && phoneValid && !submitting;
+  const canSubmit =
+    nameValid && emailValid && phoneValid && marketingConsent && phoneConsent && !submitting;
 
   /** reset_form_start — pierwszy focus w formularzu, raz na sesję widoku. */
   function onFirstFocus() {
@@ -60,7 +70,7 @@ export function ResetForm({ formId }: { formId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setTouched({ firstName: true, email: true, phone: true });
+    setTouched({ firstName: true, email: true, phone: true, marketingConsent: true, phoneConsent: true });
     if (!canSubmit || inFlight.current) return; // blokada podwójnego kliknięcia
 
     inFlight.current = true;
@@ -203,29 +213,51 @@ export function ResetForm({ formId }: { formId: string }) {
         {submitting ? c.ctaLoading : c.cta}
       </Button>
 
-      {/* Zgody — osobne per kanał, opcjonalne, domyślnie niezaznaczone.
+      {/* Zgody — osobne per kanał, obie wymagane (decyzja 2026-08-16).
           Jeden wspólny checkbox „na wszystko" jest wprost zakazany. */}
-      <label className="flex cursor-pointer items-start gap-3 pt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
-        <input
-          type="checkbox"
-          name="marketingConsent"
-          checked={marketingConsent}
-          onChange={(e) => setMarketingConsent(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
-        />
-        <span>{c.marketingConsent}</span>
-      </label>
+      <div>
+        <label className="flex cursor-pointer items-start gap-3 pt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
+          <input
+            type="checkbox"
+            name="marketingConsent"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            onBlur={() => setTouched((t) => ({ ...t, marketingConsent: true }))}
+            aria-invalid={touched.marketingConsent && !marketingConsent ? true : undefined}
+            aria-describedby={
+              touched.marketingConsent && !marketingConsent ? marketingConsentErrorId : undefined
+            }
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
+          />
+          <span>{c.marketingConsent}</span>
+        </label>
+        {touched.marketingConsent && !marketingConsent && (
+          <p id={marketingConsentErrorId} className="mt-1.5 text-sm text-danger">
+            {c.marketingConsentError}
+          </p>
+        )}
+      </div>
 
-      <label className="flex cursor-pointer items-start gap-3 text-[0.8125rem] leading-relaxed text-text-secondary">
-        <input
-          type="checkbox"
-          name="phoneConsent"
-          checked={phoneConsent}
-          onChange={(e) => setPhoneConsent(e.target.checked)}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
-        />
-        <span>{c.phoneConsent}</span>
-      </label>
+      <div>
+        <label className="flex cursor-pointer items-start gap-3 text-[0.8125rem] leading-relaxed text-text-secondary">
+          <input
+            type="checkbox"
+            name="phoneConsent"
+            checked={phoneConsent}
+            onChange={(e) => setPhoneConsent(e.target.checked)}
+            onBlur={() => setTouched((t) => ({ ...t, phoneConsent: true }))}
+            aria-invalid={touched.phoneConsent && !phoneConsent ? true : undefined}
+            aria-describedby={touched.phoneConsent && !phoneConsent ? phoneConsentErrorId : undefined}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
+          />
+          <span>{c.phoneConsent}</span>
+        </label>
+        {touched.phoneConsent && !phoneConsent && (
+          <p id={phoneConsentErrorId} className="mt-1.5 text-sm text-danger">
+            {c.phoneConsentError}
+          </p>
+        )}
+      </div>
 
       {/* Klauzula informacyjna — informacja, nie zgoda (brief sekcja 8). */}
       <p className="text-[0.6875rem] leading-relaxed text-text-secondary/80">
