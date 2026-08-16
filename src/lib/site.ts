@@ -29,6 +29,13 @@ export const site = {
   consentVersion: "reset-2026-08",
 
   /**
+   * Wersja treści zgody na kontakt TELEFONICZNY — osobna od e-mailowej, bo
+   * kanały mają własne podstawy prawne (PKE art. 398) i własny dowód zgody.
+   * Zmiana brzmienia checkboxa = podbicie tej wartości.
+   */
+  phoneConsentVersion: "phone-2026-08",
+
+  /**
    * Bridge „POZNAJ THE CONTROL SYSTEM 1:1" na stronie podziękowania.
    * Brief sekcja 16: sekcję ukryć do czasu publikacji /system.
    * Przełącznik: NEXT_PUBLIC_SYSTEM_PAGE_LIVE=true.

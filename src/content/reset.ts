@@ -84,6 +84,16 @@ export const resetCopy = {
     marketingConsent:
       "Chcę otrzymywać od Krystiana Ćwika / The Control System drogą elektroniczną dodatkowe materiały edukacyjne, wskazówki, informacje o The Control System oraz informacje handlowe na podany adres email. Wiem, że zgodę mogę wycofać w każdej chwili.",
     /**
+     * Osobna zgoda na kanał TELEFONICZNY (PKE art. 398 — wymagana uprzednia zgoda).
+     * Opcjonalna: brak zaznaczenia nie blokuje wysłania Protokołu, a jedynie
+     * zamyka drogę do kontaktu telefonicznego.
+     */
+    phoneConsent:
+      "Zgadzam się na kontakt telefoniczny od Krystiana Ćwika / The Control System na podany numer, w tym połączenia i wiadomości SMS, w sprawie Protokołu Resetu oraz współpracy 1 na 1. Wiem, że zgodę mogę wycofać w każdej chwili.",
+    /** Wyjaśnienie przy polu telefonu — po co jest, skoro Protokół idzie mailem. */
+    phoneHelp:
+      "Numer wykorzystujemy do kontaktu w sprawie Twojego zgłoszenia. Dzwonimy wyłącznie do osób, które zaznaczyły zgodę poniżej.",
+    /**
      * Klauzula informacyjna pod formularzem (brief sekcja 8).
      * NIE jest zgodą — nie ma checkboxa „akceptuję politykę prywatności".
      */

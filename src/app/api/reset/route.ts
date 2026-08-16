@@ -15,7 +15,9 @@ interface ResetBody {
   email?: string;
   phone?: string;
   marketingConsent?: boolean;
+  phoneConsent?: boolean;
   consentVersion?: string;
+  phoneConsentVersion?: string;
   turnstileToken?: string;
   source?: Record<string, string | undefined>;
 }
@@ -111,15 +113,27 @@ export async function POST(req: NextRequest) {
     ? (rows[0] as { id: string; email_bounced: boolean } | undefined)
     : undefined;
 
-  // `upsert_lead` nie przyjmuje telefonu (powstała, gdy formularz go nie zbierał),
-  // więc dopisujemy go osobno. Nieudany zapis numeru nie może przerwać wysyłki
-  // Protokołu — lead jest już w bazie, a numer to dana dodatkowa.
+  // `upsert_lead` nie przyjmuje telefonu ani zgody telefonicznej (powstała, gdy
+  // formularz zbierał wyłącznie imię i e-mail), więc dopisujemy je osobno.
+  // Nieudany zapis nie może przerwać wysyłki Protokołu — lead jest już w bazie.
   if (lead?.id) {
+    const phoneConsent = body.phoneConsent === true;
+
     const { error: phoneError } = await db
       .from("leads")
-      .update({ phone_e164: phone })
+      .update({
+        phone_e164: phone,
+        // Sam podany numer NIE jest zgodą na dzwonienie (PKE art. 398) —
+        // zapisujemy wyłącznie jawny wybór użytkownika, wraz z dowodem:
+        // kiedy i na jakiej treści go dokonał.
+        phone_consent: phoneConsent,
+        phone_consent_at: phoneConsent ? new Date().toISOString() : null,
+        phone_consent_version: phoneConsent
+          ? (body.phoneConsentVersion ?? site.phoneConsentVersion)
+          : null,
+      })
       .eq("id", lead.id);
-    if (phoneError) console.error("[/api/reset] zapis telefonu nieudany:", phoneError.message);
+    if (phoneError) console.error("[/api/reset] zapis telefonu/zgody nieudany:", phoneError.message);
   }
 
   if (upsertError || !lead) {

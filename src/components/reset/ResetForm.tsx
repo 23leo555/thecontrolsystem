@@ -17,8 +17,9 @@ const c = resetCopy.form;
  * Zasady, których nie wolno rozluźnić:
  * - trzy pola: imię, email i telefon (telefon obowiązkowy od 2026-08-15,
  *   decyzja właściciela; brief V2 sekcja 7 przewidywał tylko dwa),
- * - zgoda marketingowa jest OSOBNA i domyślnie niezaznaczona, a jej brak nie
- *   blokuje wysyłki Protokołu,
+ * - zgody są OSOBNE dla kanału e-mail i telefonicznego, domyślnie niezaznaczone,
+ *   a brak którejkolwiek nie blokuje wysyłki Protokołu (PKE art. 398 wymaga
+ *   uprzedniej zgody na kontakt telefoniczny — sam podany numer nią nie jest),
  * - nie ma checkboxa „akceptuję politykę prywatności" — polityka jest
  *   informacją, nie umową wymagającą zgody,
  * - błąd nie kasuje wpisanych danych,
@@ -35,6 +36,7 @@ export function ResetForm({ formId }: { formId: string }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [phoneConsent, setPhoneConsent] = useState(false);
   const [touched, setTouched] = useState<{ firstName?: boolean; email?: boolean; phone?: boolean }>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -74,7 +76,9 @@ export function ResetForm({ formId }: { formId: string }) {
           email,
           phone,
           marketingConsent,
+          phoneConsent,
           consentVersion: site.consentVersion,
+          phoneConsentVersion: site.phoneConsentVersion,
           // Źródło z utrwalonego first-touch — przetrwa przejście przez podstrony.
           source: touchForSubmission(),
         }),
@@ -175,9 +179,13 @@ export function ResetForm({ formId }: { formId: string }) {
           className={fieldClass}
           placeholder={c.phonePlaceholder}
         />
-        {touched.phone && !phoneValid && (
+        {touched.phone && !phoneValid ? (
           <p id={`${phoneId}-error`} className="mt-1.5 text-sm text-danger">
             {c.phoneError}
+          </p>
+        ) : (
+          <p className="mt-1.5 text-[0.75rem] leading-relaxed text-text-secondary/80">
+            {c.phoneHelp}
           </p>
         )}
       </div>
@@ -195,15 +203,28 @@ export function ResetForm({ formId }: { formId: string }) {
         {submitting ? c.ctaLoading : c.cta}
       </Button>
 
-      {/* Zgoda marketingowa — osobna, opcjonalna, domyślnie niezaznaczona. */}
+      {/* Zgody — osobne per kanał, opcjonalne, domyślnie niezaznaczone.
+          Jeden wspólny checkbox „na wszystko" jest wprost zakazany. */}
       <label className="flex cursor-pointer items-start gap-3 pt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
         <input
           type="checkbox"
+          name="marketingConsent"
           checked={marketingConsent}
           onChange={(e) => setMarketingConsent(e.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
         />
         <span>{c.marketingConsent}</span>
+      </label>
+
+      <label className="flex cursor-pointer items-start gap-3 text-[0.8125rem] leading-relaxed text-text-secondary">
+        <input
+          type="checkbox"
+          name="phoneConsent"
+          checked={phoneConsent}
+          onChange={(e) => setPhoneConsent(e.target.checked)}
+          className="mt-0.5 h-5 w-5 shrink-0 accent-[#4f76ff]"
+        />
+        <span>{c.phoneConsent}</span>
       </label>
 
       {/* Klauzula informacyjna — informacja, nie zgoda (brief sekcja 8). */}
