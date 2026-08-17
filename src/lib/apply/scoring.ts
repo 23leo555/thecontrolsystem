@@ -62,8 +62,11 @@ const POINTS = {
   workMode: { stable: 2, intense: 4, variable: 8, crisis: 8 },
   controlArea: { body: 8, energy: 8, sleep: 7, training: 7, food: 7, chaos: 6, combo: 10 },
   duration: { lt_6m: 1, "6_12m": 3, "1_3y": 5, gt_3y: 5 },
-  blocker: { work_time: 3, travel: 3, no_energy: 2, no_plan: 5, consistency: 3, other: 2 },
-  whyNow: { health: 9, event: 7, tired_of_waiting: 12, other: 4 },
+  // "other" nie jest karane niżej niż środek tabeli — to pole odsłania
+  // konkretny, własny opis, co jest silniejszym sygnałem niż wybranie
+  // generycznej opcji z listy, nie słabszym (korekta 2026-08-17).
+  blocker: { work_time: 3, travel: 3, no_energy: 2, no_plan: 5, consistency: 3, other: 3 },
+  whyNow: { health: 9, event: 7, tired_of_waiting: 12, other: 9 },
   readiness: { ready_now: 15, considering_soon: 8, analyzing: 3, browsing: 0 },
   income: { lt_15k: 0, "15_20k": 10, "20_30k": 18, "30_50k": 20, gte_50k: 20 },
 } as const;

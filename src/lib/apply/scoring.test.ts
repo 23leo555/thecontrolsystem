@@ -108,7 +108,7 @@ describe("progi", () => {
   });
 
   it("wynik poniżej 50 daje NOT_QUALIFIED, nawet z capem", () => {
-    // 8+2+2+6+1+1+2+4+3+18 = 47.
+    // 8+2+2+6+1+1+3+9+3+10 = 45.
     const r = evaluate({
       ...perfect,
       age: "60_plus",
@@ -123,7 +123,7 @@ describe("progi", () => {
       whyNow: "other",
       whyNowOther: "Coś innego",
       readiness: "analyzing",
-      income: "20_30k",
+      income: "15_20k",
     } as Answers);
     expect(r.hardGate).toBeNull();
     expect(r.score).toBeLessThan(50);
