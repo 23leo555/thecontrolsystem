@@ -8,7 +8,7 @@ export const applyIntro = {
   eyebrow: "APLIKACJA DO THE CONTROL SYSTEM 1 NA 1",
   headline: "Sprawdźmy, czy ten system może zostać dopasowany do Twojej sytuacji.",
   supporting:
-    "Aplikacja zajmuje około 4 minut. Odpowiedz konkretnie. Na podstawie odpowiedzi otrzymasz jeden z trzech statusów: potencjalne dopasowanie, osobista weryfikacja lub brak dopasowania na ten moment.",
+    "Aplikacja zajmuje około 4 minut. Odpowiedz konkretnie. Na podstawie odpowiedzi od razu otrzymasz dostęp do kalendarza rozmów albo informację, że zgłoszenie trafiło do osobistej weryfikacji.",
   cta: "ROZPOCZNIJ APLIKACJĘ",
   microcopy:
     "Nie każdy kandydat otrzymuje możliwość rozmowy. Twoje odpowiedzi są traktowane poufnie i nie są przekazywane do narzędzi reklamowych.",

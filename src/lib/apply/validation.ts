@@ -2,15 +2,15 @@ import { QUESTIONS, type Answers, type QuestionId } from "./questions";
 import { isValidEmail, normalizeEmail, toE164 } from "@/lib/validation";
 
 /**
- * Walidacja odpowiedzi aplikacji — sekcje U i W1.
+ * Walidacja odpowiedzi aplikacji — druga generacja pytań (2026-08-16).
  *
- * Uruchamiana PO STRONIE SERWERA przed scoringiem (V1). Klient może mieć
- * własną walidację dla UX, ale jej wynik nie jest przyjmowany na wiarę (W3).
+ * Uruchamiana PO STRONIE SERWERA przed scoringiem. Klient ma własną walidację
+ * dla UX, ale jej wynik nie jest przyjmowany na wiarę.
  */
 
 export interface ValidationResult {
   ok: boolean;
-  /** Błędy per pytanie — komunikaty pokazywane inline i w podsumowaniu dla czytnika (W1). */
+  /** Błędy per pytanie — komunikaty pokazywane inline i w podsumowaniu dla czytnika. */
   errors: Partial<Record<QuestionId | "consent", string>>;
   /** Odpowiedzi po normalizacji (e-mail, telefon, przycięte białe znaki). */
   normalized: Answers;
@@ -31,71 +31,70 @@ function validateSingle(id: QuestionId, value: unknown, errors: ValidationResult
   return value;
 }
 
+/** Pytania single-select z opcją „Coś innego" / „Inna sytuacja" odsłaniającą pole tekstowe. */
+const REVEALS_OTHER: QuestionId[] = ["role", "blocker", "whyNow"];
+
 export function validateApplication(raw: unknown, consent: unknown): ValidationResult {
   const errors: ValidationResult["errors"] = {};
   const normalized: Answers = {};
   const input = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
 
-  // --- U1, U2, U4, U6, U7, U8, U9, U10, U11: pojedynczy wybór ---
+  // --- Pytania jednokrotnego wyboru ---
   for (const id of [
     "age",
     "role",
-    "goal",
+    "workMode",
+    "controlArea",
     "duration",
-    "attempts",
-    "urgency",
-    "process",
-    "decision",
+    "blocker",
+    "whyNow",
+    "readiness",
+    "gender",
     "income",
   ] as const) {
     const v = validateSingle(id, input[id], errors);
     if (v) normalized[id] = v;
   }
 
-  // --- U2: „Inna sytuacja" wymaga pola tekstowego 3-120 znaków (W1) ---
-  if (normalized.role === "other") {
-    const other = typeof input.roleOther === "string" ? input.roleOther.trim() : "";
-    if (other.length < 3 || other.length > 120) {
-      errors.role = "Opisz swoją sytuację w 3–120 znakach.";
-    } else {
-      (normalized as Record<string, unknown>).roleOther = other;
+  // --- Reveal pola „Coś innego" — 2-120 znaków, klucz w body to `${id}Other` ---
+  for (const id of REVEALS_OTHER) {
+    if (normalized[id] === "other") {
+      const key = `${id}Other`;
+      const other = typeof input[key] === "string" ? (input[key] as string).trim() : "";
+      if (other.length < 2 || other.length > 120) {
+        errors[id] = "Opisz krótko w 2–120 znakach.";
+      } else {
+        (normalized as Record<string, unknown>)[key] = other;
+      }
     }
   }
 
-  // --- U3: 1-3 zaznaczenia, „Żaden" wyklucza pozostałe ---
-  const env = Array.isArray(input.environment) ? input.environment.filter((x) => typeof x === "string") : [];
-  const envAllowed = optionValues("environment");
-  if (env.length === 0) {
-    errors.environment = "Wybierz od jednego do trzech elementów.";
-  } else if (env.some((e) => !envAllowed.includes(e as string))) {
-    errors.environment = "Nieprawidłowa odpowiedź.";
-  } else if (env.includes("none") && env.length > 1) {
-    errors.environment = "Odpowiedź „Żaden z powyższych” nie łączy się z innymi.";
-  } else if (env.length > 3) {
-    errors.environment = "Możesz wybrać maksymalnie trzy elementy.";
+  // --- Wcześniejsze próby: multi-select, „Nic konkretnego" wyklucza pozostałe ---
+  const attempts = Array.isArray(input.attempts) ? input.attempts.filter((x) => typeof x === "string") : [];
+  const attemptsAllowed = optionValues("attempts");
+  if (attempts.length === 0) {
+    errors.attempts = "Zaznacz przynajmniej jedną odpowiedź.";
+  } else if (attempts.some((a) => !attemptsAllowed.includes(a as string))) {
+    errors.attempts = "Nieprawidłowa odpowiedź.";
+  } else if (attempts.includes("none") && attempts.length > 1) {
+    errors.attempts = "Odpowiedź „Nic konkretnego” nie łączy się z innymi.";
   } else {
-    normalized.environment = env as string[];
+    normalized.attempts = attempts as string[];
   }
 
-  // --- U5: skala 1-5 ---
-  const impact = typeof input.impact === "string" ? input.impact : String(input.impact ?? "");
-  if (!["1", "2", "3", "4", "5"].includes(impact)) {
-    errors.impact = "Wybierz wartość od 1 do 5.";
-  } else {
-    normalized.impact = impact;
+  // --- Dwa pytania otwarte: 20-800 znaków, bez automatycznej oceny treści ---
+  for (const id of ["whyFailed", "goal"] as const) {
+    const text = typeof input[id] === "string" ? (input[id] as string).trim() : "";
+    if (text.length < 20) {
+      errors[id] = "Napisz co najmniej 20 znaków.";
+    } else if (text.length > 800) {
+      errors[id] = "Maksymalnie 800 znaków.";
+    } else {
+      normalized[id] = text;
+    }
   }
 
-  // --- U12: 30-800 znaków, bez automatycznej oceny treści ---
-  const motivation = typeof input.motivation === "string" ? input.motivation.trim() : "";
-  if (motivation.length < 30) {
-    errors.motivation = "Napisz co najmniej 30 znaków.";
-  } else if (motivation.length > 800) {
-    errors.motivation = "Maksymalnie 800 znaków.";
-  } else {
-    normalized.motivation = motivation;
-  }
-
-  // --- U13: imię i nazwisko, Unicode 2-60 znaków każde ---
+  // --- Imię i nazwisko, Unicode 2-60 znaków każde ---
   const nameInput = (typeof input.name === "object" && input.name !== null ? input.name : {}) as Record<string, unknown>;
   const first = typeof nameInput.first === "string" ? nameInput.first.trim() : "";
   const last = typeof nameInput.last === "string" ? nameInput.last.trim() : "";
@@ -109,7 +108,7 @@ export function validateApplication(raw: unknown, consent: unknown): ValidationR
     normalized.name = { first, last };
   }
 
-  // --- U14: e-mail, walidacja klient + serwer ---
+  // --- E-mail, walidacja klient + serwer ---
   const emailRaw = typeof input.email === "string" ? input.email.trim() : "";
   if (emailRaw.length > 254 || !isValidEmail(emailRaw)) {
     errors.email = "Podaj poprawny adres e-mail.";
@@ -117,7 +116,7 @@ export function validateApplication(raw: unknown, consent: unknown): ValidationR
     normalized.email = normalizeEmail(emailRaw);
   }
 
-  // --- U15: telefon w E.164, domyślny prefiks +48 ---
+  // --- Telefon w E.164, domyślny prefiks +48 ---
   const phoneRaw = typeof input.phone === "string" ? input.phone.trim() : "";
   const e164 = phoneRaw ? toE164(phoneRaw) : null;
   if (!e164) {
@@ -126,7 +125,7 @@ export function validateApplication(raw: unknown, consent: unknown): ValidationR
     normalized.phone = e164;
   }
 
-  // --- U16: wymagane potwierdzenie prywatności; brak zgody marketingowej ---
+  // --- Wymagane potwierdzenie prywatności ---
   if (consent !== true) {
     errors.consent = "Potwierdzenie jest wymagane, żeby wysłać aplikację.";
   }

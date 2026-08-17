@@ -11,10 +11,13 @@ import type { Answers } from "./questions";
 const answers: Answers = {
   age: "30_39",
   role: "owner",
-  urgency: "14d",
-  process: "logistics_uncertain",
+  workMode: "variable",
+  controlArea: "combo",
+  blocker: "no_plan",
+  whyNow: "tired_of_waiting",
+  readiness: "considering_soon",
   income: "gte_50k",
-  motivation: "Bardzo osobista odpowiedz opisowa, ktora nie ma prawa trafic do skrzynki wlasciciela.",
+  goal: "Bardzo osobista odpowiedz opisowa, ktora nie ma prawa trafic do skrzynki wlasciciela.",
   name: { first: "Jan", last: "Kowalski" },
   email: "jan@example.com",
 };
@@ -72,7 +75,7 @@ describe("szablony e-mail lejka /apply", () => {
     }
   });
 
-  it("powiadomienie wewnętrzne pomija dochód i odpowiedź opisową (AC6)", () => {
+  it("powiadomienie wewnętrzne pomija dochód i odpowiedzi otwarte", () => {
     const tpl = ownerNotificationTemplate({
       firstName: "Jan",
       lastName: "Kowalski",
@@ -88,8 +91,8 @@ describe("szablony e-mail lejka /apply", () => {
     expect(tpl.html).not.toContain("50 000");
     expect(tpl.html).not.toContain("osobista odpowiedz opisowa");
     expect(tpl.text).not.toContain("osobista odpowiedz opisowa");
-    // Pilność i gotowość są tłumaczone na etykiety, nie surowe wartości.
-    expect(tpl.text).toContain("W ciągu 14 dni");
-    expect(tpl.text).toContain("muszę najpierw potwierdzić logistykę");
+    // Odpowiedzi są tłumaczone na etykiety, nie surowe wartości.
+    expect(tpl.text).toContain("Mam dość odkładania tego w czasie");
+    expect(tpl.text).toContain("Poważnie rozważam zmianę w najbliższych tygodniach");
   });
 });

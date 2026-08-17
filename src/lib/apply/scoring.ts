@@ -2,21 +2,42 @@ import "server-only";
 import type { Answers, AnswerValue } from "./questions";
 
 /**
- * Scoring aplikacji — sekcje V i W briefu wdrożeniowego v1.0.
+ * Scoring aplikacji — druga generacja pytań (2026-08-16), ta sama architektura
+ * klasyfikacji co poprzednia wersja (tcs-v1.0): hard gates -> capy Manual
+ * Review -> próg punktowy. Zmieniły się tylko pytania i mapowanie punktów —
+ * mechanizm decyzyjny został przywrócony na wyraźną prośbę właściciela.
  *
- * ZASADY NIENEGOCJOWALNE (V1, W3):
+ * ZASADY NIENEGOCJOWALNE (odziedziczone z v1.0):
  * - liczone WYŁĄCZNIE po stronie serwera, po walidacji wszystkich odpowiedzi,
  * - `import "server-only"` gwarantuje, że tabela punktowa i progi nigdy nie
  *   trafią do bundla przeglądarki,
  * - wynik, progi i powód odrzucenia NIE są zwracane użytkownikowi,
- * - odpowiedź otwarta (U12) nie jest oceniana automatycznie.
+ * - odpowiedzi otwarte (whyFailed, goal) nie są oceniane automatycznie.
  *
- * Kolejność decyzji (V1 + V4): hard gates -> capy Manual Review -> próg punktowy.
- * Hard gate zawsze wygrywa z punktami. Cap zawsze blokuje automatyczny Calendly,
- * nawet przy komplecie 100 punktów.
+ * Mapowanie starych wymiarów na nowe pytania (do weryfikacji przez właściciela —
+ * wagi są najlepszym możliwym przełożeniem, nie testowaną kalibracją):
+ *   age        -> age (te same bramy wiekowe co dawniej, bez najniższego progu
+ *                 „poniżej 23", którego już nie ma w ankiecie)
+ *   role       -> role (bez zmian)
+ *   environment (multi, do 3) -> workMode (single) — więcej zmienności/chaosu
+ *                 w grafiku = wyższy sygnał, tak jak dawniej
+ *   goal       -> controlArea — dawne „goal" było single-select z tą samą rolą
+ *                 diagnostyczną, którą teraz pełni controlArea
+ *   impact (skala 1-5) -> USUNIĘTE, nie ma odpowiednika w nowej ankiecie;
+ *                 budżet punktowy przeniesiony na pozostałe wymiary
+ *   duration   -> duration (bez zmian)
+ *   attempts (single) -> attempts (multi) — funkcja licząca zamiast tabeli
+ *   urgency    -> whyNow (inne opcje, ta sama rola: sygnał pilności)
+ *   process + decision -> połączone w jedno pytanie readiness (4 opcje
+ *                 zamiast 3+4) — „browsing" dziedziczy hard gate po
+ *                 process:no i decision:not_ready, „analyzing" dziedziczy cap
+ *                 po process:logistics_uncertain i decision:needs_approval
+ *   income     -> income (bez zmian, te same bramy i progi)
+ *   motivation -> whyFailed / goal (oba nieocenianie, jak dawniej motivation)
+ *   blocker    -> NOWE pytanie bez odpowiednika w v1.0, umiarkowana waga
  */
 
-export const SCORING_VERSION = "tcs-v1.0";
+export const SCORING_VERSION = "tcs-v2.0";
 export const MAX_SCORE = 100;
 
 export type Status = "QUALIFIED" | "MANUAL_REVIEW" | "NOT_QUALIFIED";
@@ -24,7 +45,7 @@ export type Status = "QUALIFIED" | "MANUAL_REVIEW" | "NOT_QUALIFIED";
 export interface ScoringResult {
   score: number;
   status: Status;
-  /** Powody wyłącznie do audytu i back-office — nigdy do przeglądarki (W3). */
+  /** Powody wyłącznie do audytu i back-office — nigdy do przeglądarki. */
   hardGate: string | null;
   caps: string[];
   breakdown: Record<string, number>;
@@ -34,25 +55,27 @@ export interface ScoringResult {
 const str = (v: AnswerValue | undefined): string | null => (typeof v === "string" ? v : null);
 const arr = (v: AnswerValue | undefined): string[] => (Array.isArray(v) ? v : []);
 
-/** Tabela punktowa V2. Klucz -> punkty. Maksimum sumuje się dokładnie do 100. */
+/** Tabela punktowa v2. Maksimum sumuje się dokładnie do 100. */
 const POINTS = {
-  age: { under_23: 0, "23_29": 5, "30_39": 10, "40_49": 10, "50_59": 10, "60_plus": 8 },
-  role: { owner: 8, ceo: 8, manager: 8, specialist: 6, other: 2 },
-  goal: { waist: 7, energy: 7, athletic: 5, system: 5, unsure: 1 },
-  impact: { "1": 0, "2": 2, "3": 5, "4": 8, "5": 10 },
-  duration: { lt_3m: 1, "3_12m": 3, "1_3y": 5, gt_3y: 5 },
-  attempts: { none: 1, one_plan: 3, many: 5, regular_no_result: 4 },
-  urgency: { "14d": 10, "30d": 8, "1_3m": 5, gt_3m: 1, browsing: 0 },
-  process: { yes: 15, logistics_uncertain: 8, no: 0 },
-  decision: { self: 5, joint: 4, needs_approval: 2, not_ready: 0 },
+  age: { under_30: 5, "30_39": 10, "40_49": 10, "50_59": 10, "60_plus": 8 },
+  role: { owner: 10, exec: 10, specialist: 7, other: 2 },
+  workMode: { stable: 2, intense: 4, variable: 8, crisis: 8 },
+  controlArea: { body: 8, energy: 8, sleep: 7, training: 7, food: 7, chaos: 6, combo: 10 },
+  duration: { lt_6m: 1, "6_12m": 3, "1_3y": 5, gt_3y: 5 },
+  blocker: { work_time: 3, travel: 3, no_energy: 2, no_plan: 5, consistency: 3, other: 2 },
+  whyNow: { health: 9, event: 7, tired_of_waiting: 12, other: 4 },
+  readiness: { ready_now: 15, considering_soon: 8, analyzing: 3, browsing: 0 },
   income: { lt_15k: 0, "15_20k": 10, "20_30k": 18, "30_50k": 20, gte_50k: 20 },
 } as const;
 
-/** U3: „Żaden z powyższych" = 1 pkt, jakikolwiek element nieregularności = 5 pkt. */
-function scoreEnvironment(value: AnswerValue | undefined): number {
+/** Więcej różnych metod próbowanych wcześniej = wyższy sygnał, tak jak dawniej. */
+function scoreAttempts(value: AnswerValue | undefined): number {
   const selected = arr(value);
   if (selected.length === 0) return 0;
-  return selected.some((s) => s !== "none") ? 5 : 1;
+  if (selected.includes("none")) return 1;
+  if (selected.length === 1) return 3;
+  if (selected.length === 2) return 4;
+  return 5;
 }
 
 function lookup<T extends Record<string, number>>(table: T, key: string | null): number {
@@ -60,21 +83,17 @@ function lookup<T extends Record<string, number>>(table: T, key: string | null):
   return table[key as keyof T] ?? 0;
 }
 
-export function calculateScore(answers: Answers): {
-  score: number;
-  breakdown: Record<string, number>;
-} {
+export function calculateScore(answers: Answers): { score: number; breakdown: Record<string, number> } {
   const breakdown: Record<string, number> = {
     age: lookup(POINTS.age, str(answers.age)),
     role: lookup(POINTS.role, str(answers.role)),
-    environment: scoreEnvironment(answers.environment),
-    goal: lookup(POINTS.goal, str(answers.goal)),
-    impact: lookup(POINTS.impact, str(answers.impact)),
+    workMode: lookup(POINTS.workMode, str(answers.workMode)),
+    controlArea: lookup(POINTS.controlArea, str(answers.controlArea)),
     duration: lookup(POINTS.duration, str(answers.duration)),
-    attempts: lookup(POINTS.attempts, str(answers.attempts)),
-    urgency: lookup(POINTS.urgency, str(answers.urgency)),
-    process: lookup(POINTS.process, str(answers.process)),
-    decision: lookup(POINTS.decision, str(answers.decision)),
+    attempts: scoreAttempts(answers.attempts),
+    blocker: lookup(POINTS.blocker, str(answers.blocker)),
+    whyNow: lookup(POINTS.whyNow, str(answers.whyNow)),
+    readiness: lookup(POINTS.readiness, str(answers.readiness)),
     income: lookup(POINTS.income, str(answers.income)),
   };
 
@@ -83,31 +102,31 @@ export function calculateScore(answers: Answers): {
 }
 
 /**
- * Hard gates (W2). Każdy z nich daje NOT_QUALIFIED niezależnie od punktów.
- * Zwracany powód służy wyłącznie audytowi — użytkownik go nie zobaczy (W3).
+ * Hard gates. Każdy z nich daje NOT_QUALIFIED niezależnie od punktów.
+ * Zwracany powód służy wyłącznie audytowi — użytkownik go nie zobaczy.
+ *
+ * `gender: "female"` jest bramą niezależną od dawnego modelu — wymóg
+ * routingu z briefu kwalifikacyjnego (kobieta nie dostaje automatycznego
+ * dostępu do kalendarza).
  */
 function findHardGate(answers: Answers): string | null {
-  if (str(answers.age) === "under_23") return "age_under_23";
+  if (str(answers.gender) === "female") return "gender";
   if (str(answers.income) === "lt_15k") return "income_below_threshold";
-  if (str(answers.process) === "no") return "process_not_ready";
-  if (str(answers.decision) === "not_ready") return "decision_not_ready";
+  if (str(answers.readiness) === "browsing") return "readiness_browsing";
   return null;
 }
 
-/** Capy Manual Review (V2). Blokują automatyczny Calendly nawet przy 100 pkt (V4). */
+/** Capy Manual Review. Blokują automatyczny Calendly nawet przy 100 pkt. */
 function findCaps(answers: Answers): string[] {
   const caps: string[] = [];
-  if (str(answers.age) === "23_29") caps.push("age_23_29");
+  if (str(answers.age) === "under_30") caps.push("age_under_30");
   if (str(answers.income) === "15_20k") caps.push("income_15_20k");
-  if (str(answers.process) === "logistics_uncertain") caps.push("process_logistics_uncertain");
-  if (str(answers.decision) === "needs_approval") caps.push("decision_needs_approval");
+  if (str(answers.readiness) === "analyzing") caps.push("readiness_analyzing");
   return caps;
 }
 
 /**
- * Pełna ocena aplikacji. Odpowiada pseudokodowi kontraktowemu z W2.
- *
- * Progi (V3):
+ * Pełna ocena aplikacji — te same progi co w v1.0:
  * - QUALIFIED: >=70, bez hard gate, bez capu,
  * - MANUAL_REVIEW: cap i >=50, albo brak capu i 50-69,
  * - NOT_QUALIFIED: dowolny hard gate albo <50.

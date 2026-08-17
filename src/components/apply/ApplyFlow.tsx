@@ -17,7 +17,9 @@ export function ApplyFlow() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
-  const [roleOther, setRoleOther] = useState("");
+  // Pole "Coś innego" / "Inna sytuacja" — jedno per pytanie z revealsTextField,
+  // kluczowane po QuestionId (role, blocker, whyNow).
+  const [extraText, setExtraText] = useState<Record<string, string>>({});
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
@@ -63,23 +65,25 @@ export function ApplyFlow() {
   const validateCurrent = (): string | null => {
     const v = answers[question.id];
     switch (question.kind) {
-      case "single":
+      case "single": {
         if (typeof v !== "string") return "Wybierz jedną odpowiedź.";
-        if (question.id === "role" && v === "other" && roleOther.trim().length < 3)
-          return "Opisz krótko swoją sytuację.";
+        if (question.revealsTextField && v === question.revealsTextField) {
+          const extra = extraText[question.id] ?? "";
+          if (extra.trim().length < 2) return "Opisz krótko w kilku słowach.";
+        }
         return null;
-      case "scale":
-        return typeof v === "string" ? null : "Wybierz wartość od 1 do 5.";
+      }
       case "multi": {
         const arr = Array.isArray(v) ? v : [];
-        if (arr.length === 0) return "Wybierz od jednego do trzech elementów.";
-        if (arr.length > 3) return "Możesz wybrać maksymalnie trzy elementy.";
+        if (arr.length === 0) return "Zaznacz przynajmniej jedną odpowiedź.";
         return null;
       }
       case "text": {
         const t = typeof v === "string" ? v.trim() : "";
-        if (t.length < 30) return "Napisz co najmniej 30 znaków.";
-        if (t.length > 800) return "Maksymalnie 800 znaków.";
+        const min = question.minLength ?? 1;
+        const max = question.maxLength ?? 800;
+        if (t.length < min) return `Napisz co najmniej ${min} znaków.`;
+        if (t.length > max) return `Maksymalnie ${max} znaków.`;
         return null;
       }
       case "name": {
@@ -148,7 +152,12 @@ export function ApplyFlow() {
         },
         body: JSON.stringify({
           applicationId: applicationId.current,
-          answers: { ...answers, roleOther },
+          // Pola "Coś innego" idą pod kluczem `${id}Other`, tak jak czyta je
+          // walidacja serwerowa (validateApplication).
+          answers: {
+            ...answers,
+            ...Object.fromEntries(Object.entries(extraText).map(([id, v]) => [`${id}Other`, v])),
+          },
           consent,
           source: touchForSubmission(),
         }),
@@ -197,7 +206,9 @@ export function ApplyFlow() {
   }
 
   if (phase === "review" || phase === "sending") {
-    const summary = QUESTIONS.filter((q) => q.id !== "income" && q.id !== "motivation").map((q) => {
+    const summary = QUESTIONS.filter(
+      (q) => q.id !== "income" && q.id !== "whyFailed" && q.id !== "goal",
+    ).map((q) => {
       const v = answers[q.id];
       let text = "";
       if (q.kind === "name") {
@@ -306,7 +317,7 @@ export function ApplyFlow() {
       )}
 
       <div className="mt-8 space-y-3">
-        {(question.kind === "single" || question.kind === "scale") &&
+        {question.kind === "single" &&
           question.options?.map((o) => {
             const selected = value === o.value;
             return (
@@ -363,14 +374,14 @@ export function ApplyFlow() {
             );
           })}
 
-        {question.id === "role" && value === "other" && (
+        {question.revealsTextField && value === question.revealsTextField && (
           <input
             type="text"
-            value={roleOther}
-            onChange={(e) => setRoleOther(e.target.value)}
+            value={extraText[question.id] ?? ""}
+            onChange={(e) => setExtraText((t) => ({ ...t, [question.id]: e.target.value }))}
             maxLength={120}
-            placeholder="Opisz krótko swoją sytuację"
-            aria-label="Opisz swoją sytuację zawodową"
+            placeholder="Opisz krótko"
+            aria-label="Doprecyzuj odpowiedź"
             className={FIELD}
           />
         )}

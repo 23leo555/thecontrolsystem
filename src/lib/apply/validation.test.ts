@@ -5,22 +5,23 @@ import { validateApplication } from "./validation";
 const valid = {
   age: "30_39",
   role: "owner",
-  environment: ["long_days", "travel"],
-  goal: "waist",
-  impact: "4",
+  workMode: "variable",
+  controlArea: "combo",
   duration: "1_3y",
-  attempts: "many",
-  urgency: "14d",
-  process: "yes",
-  decision: "self",
+  attempts: ["solo_training", "diet_app"],
+  whyFailed: "Brakowało mi systemu dopasowanego do zmiennego grafiku, nie kolejnej diety.",
+  blocker: "no_plan",
+  goal: "Chcę wreszcie uporządkować sen i regularność, bo kolejny kwartał tak nie może wyglądać.",
+  whyNow: "tired_of_waiting",
+  readiness: "ready_now",
+  gender: "male",
   income: "30_50k",
-  motivation: "Chcę wreszcie uporządkować sen i regularność, bo kolejny kwartał tak nie może wyglądać.",
   name: { first: "Krystian", last: "Ćwik" },
   email: "  Krystian.Cwik@Example.COM ",
   phone: "601 234 567",
 };
 
-describe("walidacja aplikacji (U, W1)", () => {
+describe("walidacja aplikacji", () => {
   it("przyjmuje komplet poprawnych odpowiedzi", () => {
     const r = validateApplication(valid, true);
     expect(r.errors).toEqual({});
@@ -33,7 +34,7 @@ describe("walidacja aplikacji (U, W1)", () => {
     expect(r.normalized.phone).toBe("+48601234567");
   });
 
-  it("wymaga potwierdzenia prywatności (U16)", () => {
+  it("wymaga potwierdzenia prywatności", () => {
     expect(validateApplication(valid, false).errors.consent).toBeDefined();
     expect(validateApplication(valid, undefined).ok).toBe(false);
   });
@@ -44,38 +45,38 @@ describe("walidacja aplikacji (U, W1)", () => {
   });
 });
 
-describe("U3 — reguły wielokrotnego wyboru", () => {
-  it("„Żaden z powyższych” nie łączy się z innymi", () => {
-    const r = validateApplication({ ...valid, environment: ["none", "travel"] }, true);
-    expect(r.errors.environment).toBeDefined();
-  });
-
-  it("maksymalnie trzy zaznaczenia", () => {
-    const r = validateApplication(
-      { ...valid, environment: ["long_days", "travel", "stress", "family"] },
-      true
-    );
-    expect(r.errors.environment).toBeDefined();
+describe("wcześniejsze próby — wielokrotny wybór", () => {
+  it("„Nic konkretnego” nie łączy się z innymi", () => {
+    const r = validateApplication({ ...valid, attempts: ["none", "diet_app"] }, true);
+    expect(r.errors.attempts).toBeDefined();
   });
 
   it("puste zaznaczenie jest błędem", () => {
-    expect(validateApplication({ ...valid, environment: [] }, true).errors.environment).toBeDefined();
+    expect(validateApplication({ ...valid, attempts: [] }, true).errors.attempts).toBeDefined();
   });
 
-  it("samo „Żaden” jest poprawne", () => {
-    expect(validateApplication({ ...valid, environment: ["none"] }, true).ok).toBe(true);
+  it("samo „Nic konkretnego” jest poprawne", () => {
+    expect(validateApplication({ ...valid, attempts: ["none"] }, true).ok).toBe(true);
+  });
+
+  it("dowolna liczba wybranych metod jest poprawna (brak limitu)", () => {
+    const r = validateApplication(
+      { ...valid, attempts: ["solo_training", "diet_app", "personal_trainer", "online_coaching"] },
+      true,
+    );
+    expect(r.errors.attempts).toBeUndefined();
   });
 });
 
-describe("U2 — pole tekstowe przy „Inna sytuacja” (W1)", () => {
-  it("wymaga opisu 3–120 znaków", () => {
-    expect(validateApplication({ ...valid, role: "other", roleOther: "ab" }, true).errors.role).toBeDefined();
+describe("pole „Coś innego” przy pytaniach z reveal", () => {
+  it("wymaga opisu 2–120 znaków dla role", () => {
+    expect(validateApplication({ ...valid, role: "other", roleOther: "a" }, true).errors.role).toBeDefined();
     expect(
-      validateApplication({ ...valid, role: "other", roleOther: "x".repeat(121) }, true).errors.role
+      validateApplication({ ...valid, role: "other", roleOther: "x".repeat(121) }, true).errors.role,
     ).toBeDefined();
   });
 
-  it("akceptuje poprawny opis", () => {
+  it("akceptuje poprawny opis dla role", () => {
     const r = validateApplication({ ...valid, role: "other", roleOther: "Wolny strzelec, duże kontrakty" }, true);
     expect(r.ok).toBe(true);
   });
@@ -83,17 +84,27 @@ describe("U2 — pole tekstowe przy „Inna sytuacja” (W1)", () => {
   it("nie wymaga opisu, gdy wybrano inną opcję niż „Inna sytuacja”", () => {
     expect(validateApplication({ ...valid, role: "owner", roleOther: "" }, true).ok).toBe(true);
   });
+
+  it("wymaga opisu dla blocker i whyNow, gdy wybrano „Coś innego”", () => {
+    expect(
+      validateApplication({ ...valid, blocker: "other", blockerOther: "" }, true).errors.blocker,
+    ).toBeDefined();
+    expect(
+      validateApplication({ ...valid, whyNow: "other", whyNowOther: "" }, true).errors.whyNow,
+    ).toBeDefined();
+    expect(
+      validateApplication({ ...valid, blocker: "other", blockerOther: "Nieregularne zlecenia" }, true).ok,
+    ).toBe(true);
+  });
 });
 
-describe("U12–U15 — pola tekstowe i kontaktowe", () => {
-  it("motywacja poniżej 30 znaków jest odrzucana", () => {
-    expect(validateApplication({ ...valid, motivation: "za krótko" }, true).errors.motivation).toBeDefined();
+describe("pytania otwarte i dane kontaktowe", () => {
+  it("whyFailed poniżej 20 znaków jest odrzucane", () => {
+    expect(validateApplication({ ...valid, whyFailed: "za krótko" }, true).errors.whyFailed).toBeDefined();
   });
 
-  it("motywacja powyżej 800 znaków jest odrzucana", () => {
-    expect(
-      validateApplication({ ...valid, motivation: "x".repeat(801) }, true).errors.motivation
-    ).toBeDefined();
+  it("goal powyżej 800 znaków jest odrzucane", () => {
+    expect(validateApplication({ ...valid, goal: "x".repeat(801) }, true).errors.goal).toBeDefined();
   });
 
   it("nazwisko z łącznikiem i apostrofem jest poprawne", () => {

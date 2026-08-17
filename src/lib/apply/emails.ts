@@ -192,8 +192,11 @@ ${textFooter}`,
 }
 
 /**
- * AC6 — powiadomienie wewnętrzne. Świadomie pomija dochód i treść U12:
- * skrzynka właściciela nie jest miejscem na te dane, są w panelu.
+ * Powiadomienie wewnętrzne — druga generacja pytań (2026-08-16), struktura
+ * summary z briefu kwalifikacyjnego (Część J): wiek, zawód, główny problem,
+ * blokada, gotowość, dlaczego teraz. Świadomie pomija dochód i obie
+ * odpowiedzi otwarte (whyFailed, goal) — skrzynka właściciela nie jest
+ * miejscem na te dane, są w panelu (ta sama zasada co w poprzedniej wersji).
  */
 export function ownerNotificationTemplate(args: {
   firstName: string;
@@ -227,8 +230,12 @@ export function ownerNotificationTemplate(args: {
     ["SCORE", `${args.score} / 100`],
     ["DATA", when],
     ["ŹRÓDŁO", src],
-    ["PILNOŚĆ", answerLabel("urgency", args.answers)],
-    ["GOTOWOŚĆ", answerLabel("process", args.answers)],
+    ["WIEK", answerLabel("age", args.answers)],
+    ["ZAWÓD I KONTEKST PRACY", `${answerLabel("role", args.answers)} · ${answerLabel("workMode", args.answers)}`],
+    ["GŁÓWNY PROBLEM", answerLabel("controlArea", args.answers)],
+    ["NAJWIĘKSZA BLOKADA", answerLabel("blocker", args.answers)],
+    ["DLACZEGO TERAZ", answerLabel("whyNow", args.answers)],
+    ["GOTOWOŚĆ", answerLabel("readiness", args.answers)],
   ];
 
   const table = rows
@@ -249,7 +256,7 @@ export function ownerNotificationTemplate(args: {
                     border-radius:12px;overflow:hidden;">${table}</table>
       ${cta(panelUrl, "OTWÓRZ PANEL")}
       <p style="margin:0;color:#808791 !important;font-size:12px;">
-        Dochód i odpowiedź opisowa są wyłącznie w panelu (AC6).
+        Dochód i obie odpowiedzi otwarte (dlaczego nie zadziałało, cel) są wyłącznie w panelu.
       </p>
     `),
     text: `${args.firstName} ${args.lastName}
@@ -258,10 +265,14 @@ Status: ${statusLabel[args.status]}
 Score: ${args.score}/100
 Data: ${when}
 Źródło: ${src}
-Pilność: ${answerLabel("urgency", args.answers)}
-Gotowość: ${answerLabel("process", args.answers)}
+Wiek: ${answerLabel("age", args.answers)}
+Zawód i kontekst pracy: ${answerLabel("role", args.answers)} · ${answerLabel("workMode", args.answers)}
+Główny problem: ${answerLabel("controlArea", args.answers)}
+Największa blokada: ${answerLabel("blocker", args.answers)}
+Dlaczego teraz: ${answerLabel("whyNow", args.answers)}
+Gotowość: ${answerLabel("readiness", args.answers)}
 
 Panel: ${panelUrl}
-Dochód i odpowiedź opisowa są wyłącznie w panelu (AC6).`,
+Dochód i obie odpowiedzi otwarte (dlaczego nie zadziałało, cel) są wyłącznie w panelu.`,
   };
 }
