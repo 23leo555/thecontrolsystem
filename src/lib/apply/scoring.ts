@@ -29,9 +29,12 @@ import type { Answers, AnswerValue } from "./questions";
  *   attempts (single) -> attempts (multi) — funkcja licząca zamiast tabeli
  *   urgency    -> whyNow (inne opcje, ta sama rola: sygnał pilności)
  *   process + decision -> połączone w jedno pytanie readiness (4 opcje
- *                 zamiast 3+4) — „browsing" dziedziczy hard gate po
- *                 process:no i decision:not_ready, „analyzing" dziedziczy cap
- *                 po process:logistics_uncertain i decision:needs_approval
+ *                 zamiast 3+4) — „analyzing" i „browsing" to capy (dziedziczą
+ *                 po process:logistics_uncertain/decision:needs_approval),
+ *                 nie hard gate. Brief dopuszcza wyłącznie dwie twarde bramki
+ *                 (płeć, dochód), więc dawny hard gate na process:no/
+ *                 decision:not_ready NIE ma odpowiednika — zbyt agresywne
+ *                 odrzucenie zostało cofnięte 2026-08-17
  *   income     -> income (bez zmian, te same bramy i progi)
  *   motivation -> whyFailed / goal (oba nieocenianie, jak dawniej motivation)
  *   blocker    -> NOWE pytanie bez odpowiednika w v1.0, umiarkowana waga
@@ -105,17 +108,19 @@ export function calculateScore(answers: Answers): { score: number; breakdown: Re
 }
 
 /**
- * Hard gates. Każdy z nich daje NOT_QUALIFIED niezależnie od punktów.
+ * Hard gates. DOKŁADNIE dwie, zgodnie z briefem kwalifikacyjnym (sekcja 27):
+ * płeć i dochód. Żadna inna odpowiedź nie blokuje automatycznie — reszta
+ * trafia do capów albo progu punktowego, nigdy do twardego odrzucenia.
  * Zwracany powód służy wyłącznie audytowi — użytkownik go nie zobaczy.
  *
- * `gender: "female"` jest bramą niezależną od dawnego modelu — wymóg
- * routingu z briefu kwalifikacyjnego (kobieta nie dostaje automatycznego
- * dostępu do kalendarza).
+ * Poprzednia wersja dokładała tu trzecią bramkę na `readiness === "browsing"`
+ * (dziedziczoną po starym process:no/decision:not_ready) — w praktyce
+ * odrzucała niemal wszystkich i została cofnięta 2026-08-17. "Browsing"
+ * zostaje capem niżej, nie twardym stopem.
  */
 function findHardGate(answers: Answers): string | null {
   if (str(answers.gender) === "female") return "gender";
   if (str(answers.income) === "lt_15k") return "income_below_threshold";
-  if (str(answers.readiness) === "browsing") return "readiness_browsing";
   return null;
 }
 
@@ -125,6 +130,7 @@ function findCaps(answers: Answers): string[] {
   if (str(answers.age) === "under_30") caps.push("age_under_30");
   if (str(answers.income) === "15_20k") caps.push("income_15_20k");
   if (str(answers.readiness) === "analyzing") caps.push("readiness_analyzing");
+  if (str(answers.readiness) === "browsing") caps.push("readiness_browsing");
   return caps;
 }
 

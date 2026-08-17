@@ -39,11 +39,10 @@ describe("tabela punktowa v2", () => {
   });
 });
 
-describe("hard gates — wygrywają z punktami", () => {
+describe("hard gates — dokładnie dwie, wygrywają z punktami", () => {
   const cases: [string, Answers, string][] = [
     ["kobieta", { ...perfect, gender: "female" }, "gender"],
     ["dochód poniżej progu", { ...perfect, income: "lt_15k" }, "income_below_threshold"],
-    ["tylko zbiera informacje", { ...perfect, readiness: "browsing" }, "readiness_browsing"],
   ];
 
   for (const [name, answers, reason] of cases) {
@@ -67,6 +66,13 @@ describe("capy Manual Review", () => {
     const r = evaluate({ ...perfect, readiness: "analyzing" });
     expect(r.status).toBe("MANUAL_REVIEW");
     expect(r.hardGate).toBeNull();
+  });
+
+  it("„tylko zbieram informacje” to cap, nie odrzucenie", () => {
+    const r = evaluate({ ...perfect, readiness: "browsing" });
+    expect(r.status).toBe("MANUAL_REVIEW");
+    expect(r.hardGate).toBeNull();
+    expect(r.caps).toContain("readiness_browsing");
   });
 
   it("dochód 15-20k to cap, mimo punktów w innych kategoriach", () => {
