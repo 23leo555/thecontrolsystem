@@ -54,31 +54,29 @@ describe("hard gates — dokładnie dwie, wygrywają z punktami", () => {
   }
 });
 
-describe("capy Manual Review", () => {
-  it("wiek poniżej 30 blokuje QUALIFIED nawet przy wysokim wyniku", () => {
-    const r = evaluate({ ...perfect, age: "under_30" });
-    expect(r.score).toBeGreaterThanOrEqual(70);
-    expect(r.status).toBe("MANUAL_REVIEW");
-    expect(r.caps).toContain("age_under_30");
-  });
-
-  it("„analizuję możliwości” to cap, nie odrzucenie", () => {
-    const r = evaluate({ ...perfect, readiness: "analyzing" });
-    expect(r.status).toBe("MANUAL_REVIEW");
-    expect(r.hardGate).toBeNull();
-  });
-
-  it("„tylko zbieram informacje” to cap, nie odrzucenie", () => {
-    const r = evaluate({ ...perfect, readiness: "browsing" });
-    expect(r.status).toBe("MANUAL_REVIEW");
-    expect(r.hardGate).toBeNull();
-    expect(r.caps).toContain("readiness_browsing");
-  });
-
-  it("dochód 15-20k to cap, mimo punktów w innych kategoriach", () => {
+describe("dostęp do kalendarza — wyłącznie trzy warunki blokują (decyzja 2026-08-18)", () => {
+  it("dochód 15-20k to jedyny pozostały cap, mimo punktów w innych kategoriach", () => {
     const r = evaluate({ ...perfect, income: "15_20k" });
     expect(r.status).toBe("MANUAL_REVIEW");
     expect(r.caps).toContain("income_15_20k");
+  });
+
+  it("wiek poniżej 30 NIE blokuje kalendarza — tylko niższe punkty", () => {
+    const r = evaluate({ ...perfect, age: "under_30" });
+    expect(r.caps).toEqual([]);
+    expect(r.status).toBe("QUALIFIED");
+  });
+
+  it("„analizuję możliwości” NIE blokuje kalendarza — tylko niższe punkty", () => {
+    const r = evaluate({ ...perfect, readiness: "analyzing" });
+    expect(r.caps).toEqual([]);
+    expect(r.status).toBe("QUALIFIED");
+  });
+
+  it("„tylko zbieram informacje” NIE blokuje kalendarza — tylko niższe punkty", () => {
+    const r = evaluate({ ...perfect, readiness: "browsing" });
+    expect(r.caps).toEqual([]);
+    expect(r.status).toBe("QUALIFIED");
   });
 });
 
@@ -134,7 +132,7 @@ describe("progi", () => {
     expect(r.hardGate).toBeNull();
     expect(r.score).toBeLessThan(50);
     // Próg punktowy wygrywa nad capem: cap sam w sobie nie ratuje przed odrzuceniem.
-    expect(r.caps).toContain("readiness_analyzing");
+    expect(r.caps).toContain("income_15_20k");
     expect(r.status).toBe("NOT_QUALIFIED");
   });
 });
