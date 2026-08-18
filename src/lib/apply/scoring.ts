@@ -34,8 +34,8 @@ import type { Answers, AnswerValue } from "./questions";
  *                 process:logistics_uncertain/decision:needs_approval zostały
  *                 usunięte 2026-08-18, bo blokowały kalendarz mimo że gotowość
  *                 nie jest jednym z trzech dozwolonych warunków blokady
- *   income     -> income (bez zmian, te same bramy i progi; 15_20k dalej
- *                 blokuje kalendarz jako trzeci dozwolony warunek — patrz
+ *   income     -> income (bez zmian, te same bramy i progi; 15_20k już nie
+ *                 blokuje kalendarza, tylko wpływa na punkty — patrz
  *                 komentarz przy findHardGate)
  *   motivation -> whyFailed / goal (oba nieocenianie, jak dawniej motivation)
  *   blocker    -> NOWE pytanie bez odpowiednika w v1.0, umiarkowana waga
@@ -109,16 +109,15 @@ export function calculateScore(answers: Answers): { score: number; breakdown: Re
 }
 
 /**
- * Blokada dostępu do kalendarza — DOKŁADNIE trzy warunki (decyzja właściciela
- * 2026-08-18, ostateczna): kobieta, dochód poniżej 15 000 zł, dochód
- * 15 000–19 999 zł (sygnał „szuka najtańszej opcji"). Żadna inna odpowiedź nie
- * blokuje automatycznie — cap na wiek i na niską gotowość zostały cofnięte,
- * bo blokowały kalendarz mimo że nie były na tej liście.
+ * Blokada dostępu do kalendarza — DOKŁADNIE dwa warunki (decyzja właściciela
+ * 2026-08-18, ostateczna): kobieta, dochód poniżej 15 000 zł. Przedział
+ * 15 000–19 999 zł był krótko capem (od 2026-08-16 do 2026-08-18), ale
+ * właściciel potwierdził, że ten przedział też ma przechodzić do kalendarza —
+ * cap usunięty. Dochód nadal wpływa na punkty (10 pkt dla 15-20k, patrz
+ * POINTS.income), po prostu już nie blokuje automatycznie.
  *
- * Pierwsze dwa to hard gate (NOT_QUALIFIED niezależnie od punktów), trzeci to
- * cap (MANUAL_REVIEW nawet przy 100 pkt) — w praktyce oba mechanizmy dają ten
- * sam efekt „brak automatycznego Calendly", różnią się tylko etykietą w
- * audycie.
+ * Żadna inna odpowiedź nie blokuje automatycznie — reszta trafia do progu
+ * punktowego, nigdy do twardego odrzucenia ani capu.
  */
 function findHardGate(answers: Answers): string | null {
   if (str(answers.gender) === "female") return "gender";
@@ -126,11 +125,9 @@ function findHardGate(answers: Answers): string | null {
   return null;
 }
 
-/** Jedyny pozostały cap — patrz komentarz przy findHardGate. */
-function findCaps(answers: Answers): string[] {
-  const caps: string[] = [];
-  if (str(answers.income) === "15_20k") caps.push("income_15_20k");
-  return caps;
+/** Obecnie brak capów — infrastruktura zostaje na wypadek przyszłej potrzeby. */
+function findCaps(_answers: Answers): string[] {
+  return [];
 }
 
 /**

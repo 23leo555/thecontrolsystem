@@ -54,11 +54,11 @@ describe("hard gates — dokładnie dwie, wygrywają z punktami", () => {
   }
 });
 
-describe("dostęp do kalendarza — wyłącznie trzy warunki blokują (decyzja 2026-08-18)", () => {
-  it("dochód 15-20k to jedyny pozostały cap, mimo punktów w innych kategoriach", () => {
+describe("dostęp do kalendarza — wyłącznie dwa warunki blokują (decyzja 2026-08-18)", () => {
+  it("dochód 15-20k NIE blokuje kalendarza — tylko niższe punkty", () => {
     const r = evaluate({ ...perfect, income: "15_20k" });
-    expect(r.status).toBe("MANUAL_REVIEW");
-    expect(r.caps).toContain("income_15_20k");
+    expect(r.caps).toEqual([]);
+    expect(r.status).toBe("QUALIFIED");
   });
 
   it("wiek poniżej 30 NIE blokuje kalendarza — tylko niższe punkty", () => {
@@ -111,7 +111,7 @@ describe("progi", () => {
     expect(r.hardGate).toBeNull();
   });
 
-  it("wynik poniżej 50 daje NOT_QUALIFIED, nawet z capem", () => {
+  it("wynik poniżej 50 daje NOT_QUALIFIED", () => {
     // 8+2+2+6+1+1+3+9+3+10 = 45.
     const r = evaluate({
       ...perfect,
@@ -130,9 +130,8 @@ describe("progi", () => {
       income: "15_20k",
     } as Answers);
     expect(r.hardGate).toBeNull();
+    expect(r.caps).toEqual([]);
     expect(r.score).toBeLessThan(50);
-    // Próg punktowy wygrywa nad capem: cap sam w sobie nie ratuje przed odrzuceniem.
-    expect(r.caps).toContain("income_15_20k");
     expect(r.status).toBe("NOT_QUALIFIED");
   });
 });
