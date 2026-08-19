@@ -80,16 +80,25 @@ describe("dostęp do kalendarza — wyłącznie dwa warunki blokują (decyzja 20
   });
 });
 
-describe("progi", () => {
-  it("czysty profil >= 70 daje QUALIFIED", () => {
+describe("progi (QUALIFIED >= 55, obniżony 2026-08-19 z 70)", () => {
+  it("czysty profil >= 55 daje QUALIFIED", () => {
     const r = evaluate(perfect);
     expect(r.score).toBe(100);
     expect(r.status).toBe("QUALIFIED");
     expect(r.caps).toEqual([]);
   });
 
-  it("wynik 50-69 bez capu daje MANUAL_REVIEW", () => {
-    // 10+2+2+6+1+1+2+4+8+18 = 54 — w przedziale, bez capów i bramek.
+  it("dochód 15-20k z przeciętną resztą odpowiedzi mieści się w progu QUALIFIED", () => {
+    // To dokładnie przypadek, który wywołał obniżenie progu: 10 pkt za dochód
+    // (zamiast 18-20 dla wyższych przedziałów) nie może już systemowo
+    // zsuwać sensownego zgłoszenia pod próg.
+    const r = evaluate({ ...perfect, income: "15_20k" });
+    expect(r.score).toBeGreaterThanOrEqual(55);
+    expect(r.status).toBe("QUALIFIED");
+  });
+
+  it("wynik 50-54 bez capu daje MANUAL_REVIEW", () => {
+    // 10+2+2+6+1+1+3+9+8+10 = 52 — w przedziale, bez capów i bramek.
     const r = evaluate({
       ...perfect,
       role: "other",
@@ -103,10 +112,10 @@ describe("progi", () => {
       whyNow: "other",
       whyNowOther: "Coś innego",
       readiness: "considering_soon",
-      income: "20_30k",
+      income: "15_20k",
     } as Answers);
     expect(r.score).toBeGreaterThanOrEqual(50);
-    expect(r.score).toBeLessThan(70);
+    expect(r.score).toBeLessThan(55);
     expect(r.status).toBe("MANUAL_REVIEW");
     expect(r.hardGate).toBeNull();
   });

@@ -131,9 +131,18 @@ function findCaps(_answers: Answers): string[] {
 }
 
 /**
- * Pełna ocena aplikacji — te same progi co w v1.0:
- * - QUALIFIED: >=70, bez hard gate, bez capu,
- * - MANUAL_REVIEW: cap i >=50, albo brak capu i 50-69,
+ * Próg QUALIFIED obniżony z 70 na 55 (decyzja właściciela, 2026-08-19) — przy
+ * 70 dochód 15-20k (10 pkt zamiast 18-20 dla wyższych przedziałów) czasem
+ * systemowo zsuwał w pełni sensowne zgłoszenia pod próg, mimo że cap na ten
+ * przedział już wcześniej zniknął. Próg NOT_QUALIFIED (<50) zostaje bez zmian.
+ */
+const QUALIFIED_THRESHOLD = 55;
+const NOT_QUALIFIED_BELOW = 50;
+
+/**
+ * Pełna ocena aplikacji:
+ * - QUALIFIED: >=55, bez hard gate, bez capu,
+ * - MANUAL_REVIEW: cap i >=50, albo brak capu i 50-54,
  * - NOT_QUALIFIED: dowolny hard gate albo <50.
  */
 export function evaluate(answers: Answers): ScoringResult {
@@ -142,9 +151,9 @@ export function evaluate(answers: Answers): ScoringResult {
   const caps = findCaps(answers);
 
   let status: Status;
-  if (hardGate || score < 50) {
+  if (hardGate || score < NOT_QUALIFIED_BELOW) {
     status = "NOT_QUALIFIED";
-  } else if (caps.length > 0 || score < 70) {
+  } else if (caps.length > 0 || score < QUALIFIED_THRESHOLD) {
     status = "MANUAL_REVIEW";
   } else {
     status = "QUALIFIED";
