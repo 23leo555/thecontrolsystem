@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { protocolDownloadOwnerTemplate } from "./email";
+import { protocolDeliveryTemplate, protocolDownloadOwnerTemplate } from "./email";
+import { protocolDownloadUrl } from "./downloadToken";
 
 describe("powiadomienie właściciela o pobraniu Protokołu", () => {
   it("pierwsze pobranie ma własny temat i pełne dane kontaktowe", () => {
@@ -42,5 +43,22 @@ describe("powiadomienie właściciela o pobraniu Protokołu", () => {
 
     expect(tpl.html).not.toContain("<script>");
     expect(tpl.html).toContain("&lt;script&gt;");
+  });
+});
+
+describe("wiadomość z Protokołem", () => {
+  it("prowadzi przez śledzony endpoint, a nie wprost do PDF-a", () => {
+    process.env.RESET_DOWNLOAD_SECRET = "sekret-testowy";
+    process.env.NEXT_PUBLIC_SITE_URL = "https://thecontrolsystem.biz";
+    try {
+      const url = protocolDownloadUrl("11111111-2222-3333-4444-555555555555");
+      const tpl = protocolDeliveryTemplate("Jan", url);
+
+      expect(tpl.html).toContain(`href="${url}"`);
+      expect(tpl.text).toContain("/api/reset/pobierz?t=");
+    } finally {
+      delete process.env.RESET_DOWNLOAD_SECRET;
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+    }
   });
 });
