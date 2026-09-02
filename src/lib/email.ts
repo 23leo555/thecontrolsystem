@@ -29,20 +29,21 @@ interface SendArgs {
 }
 
 /**
- * Adres zapasowy właściciela — powiadomienia idą TAKŻE tutaj.
+ * Robocza skrzynka właściciela (wskazana przez niego 02.09) — powiadomienia idą
+ * TAKŻE tutaj, obok adresu firmowego.
  *
  * Wiadomości z Resenda na `krystian.cwik@thecontrolsystem.biz` nie docierają:
  * nadawca i odbiorca to ten sam adres w tej samej domenie, wysyłany z obcego
- * serwera — wzorzec, który Google traktuje jak podszywanie się. Ten sam Resend
- * dostarcza bez problemu na Gmaila; potwierdzone 02.09, gdy Protokół wysłany
- * na adres @gmail.com dotarł i został otwarty.
+ * serwera — wzorzec, który Google Workspace traktuje jak podszywanie się pod
+ * własną domenę. Ten sam Resend dostarcza bez problemu na Gmaila; potwierdzone
+ * 02.09, gdy Protokół wysłany na adres @gmail.com dotarł i został otwarty.
  *
  * Adres jest doklejany ZAWSZE, a nie ustawiony jako wartość domyślna, bo
  * `OWNER_EMAIL` na produkcji może już wskazywać milczącą skrzynkę — wtedy sam
  * default niczego by nie naprawił. Nie zastępuje adresu firmowego, tylko idzie
  * obok niego; do usunięcia, gdy skrzynka firmowa zacznie odbierać.
  */
-const OWNER_FALLBACK_EMAIL = "sagrini68@gmail.com";
+const OWNER_FALLBACK_EMAIL = "krystian.cwik.twojtrener@gmail.com";
 
 /**
  * Odbiorcy powiadomień właściciela.

@@ -76,14 +76,14 @@ describe("odbiorcy powiadomień właściciela", () => {
     const to = ownerRecipients();
 
     expect(to).toContain("krystian.cwik@thecontrolsystem.biz");
-    expect(to).toContain("sagrini68@gmail.com");
+    expect(to).toContain("krystian.cwik.twojtrener@gmail.com");
   });
 
   it("przyjmuje listę adresów po przecinku i tylko dokłada je do stałych", () => {
     process.env.OWNER_EMAIL = "a@example.com, b@example.com";
     expect(ownerRecipients()).toEqual([
       site.ownerEmail,
-      "sagrini68@gmail.com",
+      "krystian.cwik.twojtrener@gmail.com",
       "a@example.com",
       "b@example.com",
     ]);
@@ -91,7 +91,7 @@ describe("odbiorcy powiadomień właściciela", () => {
 
   it("bez OWNER_EMAIL i tak wysyła na obie skrzynki właściciela", () => {
     delete process.env.OWNER_EMAIL;
-    expect(ownerRecipients()).toEqual([site.ownerEmail, "sagrini68@gmail.com"]);
+    expect(ownerRecipients()).toEqual([site.ownerEmail, "krystian.cwik.twojtrener@gmail.com"]);
   });
 
   it("OWNER_EMAIL nie potrafi usunąć adresu firmowego z listy", () => {
@@ -100,7 +100,7 @@ describe("odbiorcy powiadomień właściciela", () => {
   });
 
   it("nie duplikuje adresu, gdy ten sam jest już w OWNER_EMAIL", () => {
-    process.env.OWNER_EMAIL = "sagrini68@gmail.com";
-    expect(ownerRecipients()).toEqual([site.ownerEmail, "sagrini68@gmail.com"]);
+    process.env.OWNER_EMAIL = "krystian.cwik.twojtrener@gmail.com";
+    expect(ownerRecipients()).toEqual([site.ownerEmail, "krystian.cwik.twojtrener@gmail.com"]);
   });
 });
