@@ -19,9 +19,24 @@ const MAX_AGE_SEC = 180 * 24 * 60 * 60;
 export const PROTOCOL_PDF_PATH = "/protokol-resetu.pdf";
 
 function secret(): string | null {
-  // Własny sekret, jeśli jest; w przeciwnym razie ten sam co resend, żeby
-  // wdrożenie nie wymagało dokładania zmiennej środowiskowej.
-  return process.env.RESET_DOWNLOAD_SECRET ?? process.env.RESET_RESEND_SECRET ?? null;
+  // Własny sekret, jeśli jest; w drugiej kolejności ten sam co resend.
+  const explicit = process.env.RESET_DOWNLOAD_SECRET ?? process.env.RESET_RESEND_SECRET;
+  if (explicit) return explicit;
+
+  // Ostatnia deska ratunku: klucz wyprowadzony z SUPABASE_SERVICE_ROLE_KEY.
+  //
+  // Bez tego cała funkcja zależałaby od zmiennej, której nikt nie ustawił —
+  // a wtedy link w mailu prowadziłby wprost do PDF-a i powiadomienie NIGDY by
+  // nie przyszło, w dodatku po cichu. Service role i tak musi być ustawiony,
+  // żeby endpoint miał z czym gadać, więc feature działa od razu po wdrożeniu.
+  //
+  // To NIE jest ten sam klucz: etykieta domenowa sprawia, że z podpisu nie da
+  // się odzyskać ani użyć service role gdzie indziej. Rotacja klucza unieważnia
+  // stare linki — przestaną liczyć pobrania (PDF nadal się otworzy), więc przy
+  // rotacji warto ustawić RESET_DOWNLOAD_SECRET na stałe.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return null;
+  return createHmac("sha256", serviceKey).update("tcs:protocol-download-link:v1").digest("hex");
 }
 
 export function signDownloadToken(leadId: string): string | null {

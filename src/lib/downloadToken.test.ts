@@ -11,6 +11,7 @@ describe("podpisany link pobrania Protokołu", () => {
   afterEach(() => {
     delete process.env.RESET_DOWNLOAD_SECRET;
     delete process.env.RESET_RESEND_SECRET;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     delete process.env.NEXT_PUBLIC_SITE_URL;
   });
 
@@ -31,8 +32,29 @@ describe("podpisany link pobrania Protokołu", () => {
     expect(verifyDownloadToken(signDeliveryToken(LEAD))).toBeNull();
   });
 
-  it("bez sekretu link prowadzi wprost do PDF-a — dostawa jest ważniejsza niż telemetria", () => {
+  it("bez własnego sekretu podpisuje kluczem z service role — inaczej feature milczy po wdrożeniu", () => {
     delete process.env.RESET_DOWNLOAD_SECRET;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-testowy";
+    process.env.NEXT_PUBLIC_SITE_URL = "https://thecontrolsystem.biz";
+
+    const url = protocolDownloadUrl(LEAD);
+    expect(url).toContain("/api/reset/pobierz?t=");
+    expect(verifyDownloadToken(decodeURIComponent(new URL(url).searchParams.get("t")!))).toBe(LEAD);
+  });
+
+  it("klucz z service role nie jest samym service role — etykieta domenowa go oddziela", () => {
+    delete process.env.RESET_DOWNLOAD_SECRET;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-testowy";
+    const token = protocolDownloadUrl(LEAD);
+
+    process.env.RESET_DOWNLOAD_SECRET = "service-role-testowy";
+    const t = decodeURIComponent(new URL(token).searchParams.get("t")!);
+    expect(verifyDownloadToken(t)).toBeNull();
+  });
+
+  it("bez jakiegokolwiek klucza link prowadzi wprost do PDF-a — dostawa jest ważniejsza niż telemetria", () => {
+    delete process.env.RESET_DOWNLOAD_SECRET;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     process.env.NEXT_PUBLIC_SITE_URL = "https://thecontrolsystem.biz";
     expect(protocolDownloadUrl(LEAD)).toBe("https://thecontrolsystem.biz/protokol-resetu.pdf");
   });
