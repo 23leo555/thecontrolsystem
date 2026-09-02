@@ -39,15 +39,22 @@ interface SendArgs {
  *
  * Adres jest doklejany ZAWSZE, a nie ustawiony jako wartość domyślna, bo
  * `OWNER_EMAIL` na produkcji może już wskazywać milczącą skrzynkę — wtedy sam
- * default niczego by nie naprawił. Do usunięcia, gdy DNS/DMARC domeny zostanie
- * doprowadzony do porządku.
+ * default niczego by nie naprawił. Nie zastępuje adresu firmowego, tylko idzie
+ * obok niego; do usunięcia, gdy skrzynka firmowa zacznie odbierać.
  */
 const OWNER_FALLBACK_EMAIL = "sagrini68@gmail.com";
 
 /**
- * Odbiorcy powiadomień właściciela. `OWNER_EMAIL` przyjmuje teraz listę adresów
- * po przecinku — jedna skrzynka, która milczy, przestaje być pojedynczym
- * punktem awarii całego kanału powiadomień.
+ * Odbiorcy powiadomień właściciela.
+ *
+ * Obie skrzynki właściciela — firmowa (`site.ownerEmail`) i zapasowa — są na
+ * liście ZAWSZE, niezależnie od `OWNER_EMAIL`. Decyzja właściciela: firmowy
+ * adres ma dostawać powiadomienia nawet teraz, gdy je gubi, żeby po naprawie
+ * Workspace zaczęły tam wpadać bez zmian w kodzie i bez kolejnego wdrożenia.
+ *
+ * `OWNER_EMAIL` przyjmuje listę adresów po przecinku i wyłącznie DOKŁADA
+ * kolejnych odbiorców. Nie może już żadnego usunąć — pojedyncza skrzynka
+ * przestaje być pojedynczym punktem awarii całego kanału powiadomień.
  */
 export function ownerRecipients(): string[] {
   const configured = (process.env.OWNER_EMAIL ?? "")
@@ -55,8 +62,7 @@ export function ownerRecipients(): string[] {
     .map((entry) => entry.trim())
     .filter(Boolean);
 
-  const list = configured.length > 0 ? configured : [site.ownerEmail];
-  return [...new Set([...list, OWNER_FALLBACK_EMAIL])];
+  return [...new Set([site.ownerEmail, OWNER_FALLBACK_EMAIL, ...configured])];
 }
 
 /**

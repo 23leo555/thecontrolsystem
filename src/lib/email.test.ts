@@ -79,18 +79,28 @@ describe("odbiorcy powiadomień właściciela", () => {
     expect(to).toContain("sagrini68@gmail.com");
   });
 
-  it("przyjmuje listę adresów po przecinku", () => {
+  it("przyjmuje listę adresów po przecinku i tylko dokłada je do stałych", () => {
     process.env.OWNER_EMAIL = "a@example.com, b@example.com";
-    expect(ownerRecipients()).toEqual(["a@example.com", "b@example.com", "sagrini68@gmail.com"]);
+    expect(ownerRecipients()).toEqual([
+      site.ownerEmail,
+      "sagrini68@gmail.com",
+      "a@example.com",
+      "b@example.com",
+    ]);
   });
 
-  it("bez OWNER_EMAIL bierze adres z konfiguracji witryny", () => {
+  it("bez OWNER_EMAIL i tak wysyła na obie skrzynki właściciela", () => {
     delete process.env.OWNER_EMAIL;
     expect(ownerRecipients()).toEqual([site.ownerEmail, "sagrini68@gmail.com"]);
   });
 
-  it("nie duplikuje adresu, gdy zapasowy jest już skonfigurowany", () => {
+  it("OWNER_EMAIL nie potrafi usunąć adresu firmowego z listy", () => {
+    process.env.OWNER_EMAIL = "ktos.inny@example.com";
+    expect(ownerRecipients()).toContain(site.ownerEmail);
+  });
+
+  it("nie duplikuje adresu, gdy ten sam jest już w OWNER_EMAIL", () => {
     process.env.OWNER_EMAIL = "sagrini68@gmail.com";
-    expect(ownerRecipients()).toEqual(["sagrini68@gmail.com"]);
+    expect(ownerRecipients()).toEqual([site.ownerEmail, "sagrini68@gmail.com"]);
   });
 });
