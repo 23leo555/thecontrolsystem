@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 export type TemplateKey =
   | "protocol_delivery"
   | "reset_lead_owner"
+  | "protocol_download_owner"
   | "reset_day_1" | "reset_day_2" | "reset_day_3" | "reset_day_4"
   | "reset_day_5" | "reset_day_6" | "reset_day_7"
   | "qualified_not_booked" | "qualified_reminder"
@@ -275,6 +276,79 @@ Telefon: ${args.phone}
 Zgoda marketingowa: ${args.marketingConsent ? "tak" : "nie"}
 Data: ${when}
 Źródło: ${src}
+
+Panel: ${panelUrl}`,
+  };
+}
+
+/**
+ * Powiadomienie właściciela o POBRANIU Protokołu.
+ *
+ * `resetLeadOwnerTemplate` mówi tylko tyle, że ktoś zostawił dane. Ta
+ * wiadomość niesie sygnał o klasę mocniejszy: lead faktycznie otworzył
+ * dokument, więc jest to najlepszy moment na kontakt. Dlatego dane kontaktowe
+ * idą wprost w treści — tak samo jak w powiadomieniu o nowym leadzie.
+ *
+ * `downloadCount` rozróżnia pierwsze pobranie od powrotu do dokumentu; przy
+ * powrocie temat wiadomości jest inny, żeby dało się je filtrować w skrzynce.
+ */
+export function protocolDownloadOwnerTemplate(args: {
+  firstName: string;
+  email: string;
+  phone?: string | null;
+  downloadCount: number;
+  firstDownload: boolean;
+}) {
+  const when = new Date().toLocaleString("pl-PL", { timeZone: "Europe/Warsaw" });
+  const panelUrl = `${site.url}/admin`;
+  const name = args.firstName?.trim() || "Bez imienia";
+
+  const rows: Array<[string, string]> = [
+    ["IMIĘ", name],
+    ["E-MAIL", args.email],
+    ["TELEFON", args.phone || "brak"],
+    ["POBRANIE", args.firstDownload ? "pierwsze" : `kolejne (łącznie ${args.downloadCount})`],
+    ["DATA", when],
+  ];
+
+  const table = rows
+    .map(
+      ([k, v]) => `<tr>
+        <td style="padding:10px 12px;color:#4f76ff !important;font-size:12px;font-weight:700;
+                   letter-spacing:.08em;white-space:nowrap;vertical-align:top;">${k}</td>
+        <td style="padding:10px 12px;color:#f9fafc !important;font-size:13px;">${escLead(v)}</td>
+      </tr>`,
+    )
+    .join("");
+
+  const lead = args.firstDownload
+    ? "Protokół został właśnie pobrany po raz pierwszy."
+    : "Ta osoba wróciła do Protokołu i pobrała go ponownie.";
+
+  return {
+    subject: args.firstDownload
+      ? `[TCS][Reset] Pobranie Protokołu: ${name}`
+      : `[TCS][Reset] Ponowne pobranie Protokołu: ${name}`,
+    html: emailLayout(`
+      <h1 style="margin:0 0 12px;font-size:22px;">${escLead(name)}</h1>
+      <p style="margin:0 0 20px;color:#808791 !important;line-height:1.6;">${lead}</p>
+      <table style="width:100%;border-collapse:collapse;margin:0 0 24px;background:#0a0e18 !important;
+                    border-radius:12px;overflow:hidden;">${table}</table>
+      <p style="margin:0 0 24px;">
+        <a href="mailto:${args.email}" style="display:inline-block;background:#4f76ff !important;color:#010205 !important;
+           text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;">NAPISZ DO NIEGO</a>
+      </p>
+      <p style="margin:0;color:#808791 !important;font-size:12px;">
+        Pełna historia zgłoszenia jest też w <a href="${panelUrl}" style="color:#5b9eff !important;">panelu</a>.
+      </p>
+    `),
+    text: `${lead}
+
+Imię: ${name}
+E-mail: ${args.email}
+Telefon: ${args.phone || "brak"}
+Pobranie: ${args.firstDownload ? "pierwsze" : `kolejne (łącznie ${args.downloadCount})`}
+Data: ${when}
 
 Panel: ${panelUrl}`,
   };

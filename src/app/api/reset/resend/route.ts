@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendEmail, protocolDeliveryTemplate } from "@/lib/email";
 import { verifyDeliveryToken, deliveryCookie } from "@/lib/resendToken";
-import { site } from "@/lib/site";
+import { protocolDownloadUrl } from "@/lib/downloadToken";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? site.url}/protokol-resetu.pdf`;
+  const downloadUrl = protocolDownloadUrl(lead.id);
   const tpl = protocolDeliveryTemplate(lead.first_name, downloadUrl);
   const sent = await sendEmail({ to: lead.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
 

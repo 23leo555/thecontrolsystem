@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { resetCopy } from "@/content/reset";
 import { recordConsents, retentionUntil } from "@/lib/crm/consent";
 import { signDeliveryToken, deliveryCookie } from "@/lib/resendToken";
+import { protocolDownloadUrl } from "@/lib/downloadToken";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -233,7 +234,9 @@ export async function POST(req: NextRequest) {
   // --- E-mail do leada: best effort, nie blokuje sukcesu zapisu ---
   let emailOk = false;
   if (!lead.email_bounced) {
-    const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? site.url}/protokol-resetu.pdf`;
+    // Link prowadzi przez /api/reset/pobierz, żeby pobranie zostawiło ślad
+    // i powiadomiło właściciela; endpoint przekierowuje na ten sam PDF.
+    const downloadUrl = protocolDownloadUrl(lead.id);
     const tpl = protocolDeliveryTemplate(firstName, downloadUrl);
     const sent = await sendEmail({ to: email, subject: tpl.subject, html: tpl.html, text: tpl.text });
     emailOk = sent.ok;

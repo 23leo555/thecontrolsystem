@@ -58,6 +58,8 @@ Wklej w **Settings → Environment Variables**. Zaznacz wszystkie trzy środowis
 | `CALENDLY_ACCESS_TOKEN` | Calendly → Personal Access Token |
 | `CALENDLY_ORGANIZATION_URI` | `https://api.calendly.com/organizations/24ec6e4a-9a75-4090-9fbe-b8e2f31eaaca` |
 | `CALENDLY_WEBHOOK_SIGNING_KEY` | powstaje przy tworzeniu webhooka (punkt 5) |
+| `RESET_RESEND_SECRET` | dowolny losowy ciąg (np. `openssl rand -hex 32`) — podpisuje kontekst ponownej wysyłki |
+| `RESET_DOWNLOAD_SECRET` | opcjonalnie; podpisuje linki pobrania Protokołu. Bez niego używany jest `RESET_RESEND_SECRET`, a bez obu klucz jest wyprowadzany z `SUPABASE_SERVICE_ROLE_KEY` — powiadomienia działają bez tej zmiennej. Ustaw na stałe przed rotacją service role |
 | `MALE_ONLY_GATE` | `false` — **nie zmieniać bez akceptacji prawnej** (sekcja 11/21) |
 
 ---
