@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase";
-import { sendEmail, emailLayout } from "@/lib/email";
+import { sendEmail, emailLayout, ownerRecipients } from "@/lib/email";
 import { eventUriFromInvitee } from "@/lib/calendly";
-import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -212,7 +211,7 @@ async function notifyOwner(invitee: CalendlyPayload["payload"], subject: string)
   const when = start ? new Date(start).toLocaleString("pl-PL") : "termin nieznany";
 
   await sendEmail({
-    to: process.env.OWNER_EMAIL ?? site.ownerEmail,
+    to: ownerRecipients(),
     subject,
     html: emailLayout(`
       <h1 style="margin:0 0 16px;font-size:22px;">${subject}</h1>

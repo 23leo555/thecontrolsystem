@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { sendEmail, protocolDownloadOwnerTemplate } from "@/lib/email";
+import { sendEmail, ownerRecipients, protocolDownloadOwnerTemplate } from "@/lib/email";
 import { verifyDownloadToken, PROTOCOL_PDF_PATH } from "@/lib/downloadToken";
-import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +66,7 @@ export async function GET(req: NextRequest) {
     });
 
     const sent = await sendEmail({
-      to: process.env.OWNER_EMAIL ?? site.ownerEmail,
+      to: ownerRecipients(),
       subject: tpl.subject,
       html: tpl.html,
       text: tpl.text,

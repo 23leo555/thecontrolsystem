@@ -6,7 +6,7 @@ import type { Answers } from "@/lib/apply/questions";
 import { supabaseAdmin } from "@/lib/supabase";
 import { resultPath } from "@/lib/apply/resultToken";
 import { retentionUntil } from "@/lib/crm/consent";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, ownerRecipients } from "@/lib/email";
 import {
   qualifiedTemplate,
   manualReviewTemplate,
@@ -315,7 +315,7 @@ async function dispatchEmails(args: {
       source: args.source,
       applicationId: args.applicationId,
     });
-    await log("apply_owner_notification", await sendEmail({ to: process.env.OWNER_EMAIL ?? site.ownerEmail, ...owner }));
+    await log("apply_owner_notification", await sendEmail({ to: ownerRecipients(), ...owner }));
 
     // Lifecycle leada trzyma stan lejka dla panelu i raportów (AB1).
     //

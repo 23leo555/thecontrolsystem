@@ -22,10 +22,41 @@ export interface SendResult {
 }
 
 interface SendArgs {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text: string;
+}
+
+/**
+ * Adres zapasowy właściciela — powiadomienia idą TAKŻE tutaj.
+ *
+ * Wiadomości z Resenda na `krystian.cwik@thecontrolsystem.biz` nie docierają:
+ * nadawca i odbiorca to ten sam adres w tej samej domenie, wysyłany z obcego
+ * serwera — wzorzec, który Google traktuje jak podszywanie się. Ten sam Resend
+ * dostarcza bez problemu na Gmaila; potwierdzone 02.09, gdy Protokół wysłany
+ * na adres @gmail.com dotarł i został otwarty.
+ *
+ * Adres jest doklejany ZAWSZE, a nie ustawiony jako wartość domyślna, bo
+ * `OWNER_EMAIL` na produkcji może już wskazywać milczącą skrzynkę — wtedy sam
+ * default niczego by nie naprawił. Do usunięcia, gdy DNS/DMARC domeny zostanie
+ * doprowadzony do porządku.
+ */
+const OWNER_FALLBACK_EMAIL = "sagrini68@gmail.com";
+
+/**
+ * Odbiorcy powiadomień właściciela. `OWNER_EMAIL` przyjmuje teraz listę adresów
+ * po przecinku — jedna skrzynka, która milczy, przestaje być pojedynczym
+ * punktem awarii całego kanału powiadomień.
+ */
+export function ownerRecipients(): string[] {
+  const configured = (process.env.OWNER_EMAIL ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  const list = configured.length > 0 ? configured : [site.ownerEmail];
+  return [...new Set([...list, OWNER_FALLBACK_EMAIL])];
 }
 
 /**

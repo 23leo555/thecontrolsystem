@@ -72,7 +72,10 @@ describe("GET /api/reset/pobierz", () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://api.resend.com/emails");
     const payload = JSON.parse((init as RequestInit).body as string);
-    expect(payload.to).toBe("krystian.cwik@thecontrolsystem.biz");
+    // Powiadomienie leci na wszystkie skrzynki właściciela naraz — firmowa
+    // potrafi milczeć, więc jedna z nich nie może być pojedynczym punktem awarii.
+    expect(payload.to).toContain("krystian.cwik@thecontrolsystem.biz");
+    expect(payload.to).toContain("sagrini68@gmail.com");
     expect(payload.subject).toBe("[TCS][Reset] Pobranie Protokołu: Jan");
     expect(payload.text).toContain("jan@example.com");
     expect(payload.text).toContain("+48512543929");

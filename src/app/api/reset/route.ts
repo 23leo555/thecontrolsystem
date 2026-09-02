@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { isValidEmail, isValidFirstName, normalizeEmail, toE164 } from "@/lib/validation";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
-import { sendEmail, protocolDeliveryTemplate, resetLeadOwnerTemplate } from "@/lib/email";
+import { sendEmail, ownerRecipients, protocolDeliveryTemplate, resetLeadOwnerTemplate } from "@/lib/email";
 import { site } from "@/lib/site";
 import { resetCopy } from "@/content/reset";
 import { recordConsents, retentionUntil } from "@/lib/crm/consent";
@@ -215,7 +215,7 @@ export async function POST(req: NextRequest) {
     source: src,
   });
   const ownerSent = await sendEmail({
-    to: process.env.OWNER_EMAIL ?? site.ownerEmail,
+    to: ownerRecipients(),
     subject: ownerTpl.subject,
     html: ownerTpl.html,
     text: ownerTpl.text,

@@ -5,7 +5,7 @@ import type { Answers } from "@/lib/questions";
 import { isValidEmail, isValidFirstName, normalizeEmail, toE164 } from "@/lib/validation";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { rateLimit, pruneRateLimits } from "@/lib/rateLimit";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, ownerRecipients } from "@/lib/email";
 import {
   qualifiedNotBookedTemplate,
   manualReviewUserTemplate,
@@ -261,7 +261,7 @@ async function dispatchEmails(args: {
       });
       await log(
         "manual_review_owner",
-        await sendEmail({ to: process.env.OWNER_EMAIL ?? site.ownerEmail, ...ownerTpl }),
+        await sendEmail({ to: ownerRecipients(), ...ownerTpl }),
       );
     }
 

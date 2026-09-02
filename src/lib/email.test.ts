@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { protocolDeliveryTemplate, protocolDownloadOwnerTemplate } from "./email";
+import { afterEach, describe, expect, it } from "vitest";
+import { ownerRecipients, protocolDeliveryTemplate, protocolDownloadOwnerTemplate } from "./email";
+import { site } from "./site";
 import { protocolDownloadUrl } from "./downloadToken";
 
 describe("powiadomienie właściciela o pobraniu Protokołu", () => {
@@ -60,5 +61,36 @@ describe("wiadomość z Protokołem", () => {
       delete process.env.RESET_DOWNLOAD_SECRET;
       delete process.env.NEXT_PUBLIC_SITE_URL;
     }
+  });
+});
+
+describe("odbiorcy powiadomień właściciela", () => {
+  const before = process.env.OWNER_EMAIL;
+  afterEach(() => {
+    if (before === undefined) delete process.env.OWNER_EMAIL;
+    else process.env.OWNER_EMAIL = before;
+  });
+
+  it("dokłada adres zapasowy nawet wtedy, gdy OWNER_EMAIL wskazuje milczącą skrzynkę", () => {
+    process.env.OWNER_EMAIL = "krystian.cwik@thecontrolsystem.biz";
+    const to = ownerRecipients();
+
+    expect(to).toContain("krystian.cwik@thecontrolsystem.biz");
+    expect(to).toContain("sagrini68@gmail.com");
+  });
+
+  it("przyjmuje listę adresów po przecinku", () => {
+    process.env.OWNER_EMAIL = "a@example.com, b@example.com";
+    expect(ownerRecipients()).toEqual(["a@example.com", "b@example.com", "sagrini68@gmail.com"]);
+  });
+
+  it("bez OWNER_EMAIL bierze adres z konfiguracji witryny", () => {
+    delete process.env.OWNER_EMAIL;
+    expect(ownerRecipients()).toEqual([site.ownerEmail, "sagrini68@gmail.com"]);
+  });
+
+  it("nie duplikuje adresu, gdy zapasowy jest już skonfigurowany", () => {
+    process.env.OWNER_EMAIL = "sagrini68@gmail.com";
+    expect(ownerRecipients()).toEqual(["sagrini68@gmail.com"]);
   });
 });
