@@ -46,6 +46,29 @@ declare global {
   }
 }
 
+/**
+ * Mapowanie naszych zdarzeń na ZDARZENIA STANDARDOWE Meta.
+ *
+ * Meta optymalizuje kampanie przede wszystkim na własnym słowniku zdarzeń.
+ * `trackCustom` też da się wskazać jako cel, ale algorytm uczy się na nim
+ * wolniej i część raportów go nie pokazuje. Dlatego dla momentów, które realnie
+ * są konwersją, wysyłamy DODATKOWO zdarzenie standardowe.
+ *
+ * Zdarzenie własne leci nadal, bo niesie szczegóły (`step`, `form_id`,
+ * `stage`), których słownik Meta nie ma. Nie zawyża statystyk: zdarzenia własne
+ * i standardowe to w Menedżerze zdarzeń dwa osobne zbiory.
+ *
+ * `booking_complete` nie jest jeszcze nigdzie wywoływane w przeglądarce —
+ * rezerwacja wpada webhookiem Calendly po stronie serwera. Mapowanie zostaje
+ * gotowe na moment, w którym pojawi się strona potwierdzenia rezerwacji.
+ */
+const META_STANDARD_EVENTS: Partial<Record<AnalyticsEvent, string>> = {
+  reset_page_view: "ViewContent",
+  reset_form_submit: "Lead",
+  application_submit: "CompleteRegistration",
+  booking_complete: "Schedule",
+};
+
 /** Parametry, które NIGDY nie opuszczają naszego serwera (sekcja 18). */
 const FORBIDDEN_KEYS = new Set(["q11", "income", "dochod", "q4", "q5", "q7", "health", "answers", "score"]);
 
@@ -88,6 +111,8 @@ function dispatch(event: AnalyticsEvent, params: Record<string, unknown>, market
     window.gtag("event", event, params);
   }
   if (marketing && typeof window.fbq === "function") {
+    const standard = META_STANDARD_EVENTS[event];
+    if (standard) window.fbq("track", standard, params);
     window.fbq("trackCustom", event, params);
   }
 }

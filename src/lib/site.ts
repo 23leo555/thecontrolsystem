@@ -23,6 +23,18 @@ export const site = {
   },
 
   /**
+   * Meta Pixel — numer z Menedżera zdarzeń.
+   *
+   * Wartość z `NEXT_PUBLIC_META_PIXEL_ID` ma pierwszeństwo; ta stała jest po to,
+   * żeby pixel działał bez pamiętania o zmiennej środowiskowej (ten sam błąd
+   * wyłączył wcześniej powiadomienia o pobraniu Protokołu). ID pixela nie jest
+   * sekretem — i tak widać je w źródle każdej strony.
+   *
+   * `null` = pixel wyłączony: skrypt Meta w ogóle nie trafia do DOM.
+   */
+  metaPixelId: null as string | null,
+
+  /**
    * Wersja treści zgód zapisywana przy leadzie (brief sekcja 8 — rozliczalność).
    * Każda zmiana brzmienia zgody marketingowej = podbicie tej wartości.
    */

@@ -3,6 +3,7 @@
 import Script from "next/script";
 import { useEffect, useState } from "react";
 import { readConsent, onConsentChange } from "@/lib/consent";
+import { site } from "@/lib/site";
 
 /**
  * Skrypty GA4 i Meta Pixel — montowane DOPIERO po zgodzie (sekcje 21/22).
@@ -23,7 +24,9 @@ export function AnalyticsScripts() {
   }, []);
 
   const ga4 = process.env.NEXT_PUBLIC_GA4_ID;
-  const pixel = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  // Zmienna środowiskowa ma pierwszeństwo, ale nie jest warunkiem działania —
+  // patrz `site.metaPixelId`.
+  const pixel = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? site.metaPixelId;
 
   return (
     <>
