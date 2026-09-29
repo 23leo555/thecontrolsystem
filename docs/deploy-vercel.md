@@ -54,7 +54,7 @@ Wklej w **Settings → Environment Variables**. Zaznacz wszystkie trzy środowis
 | `RESEND_REPLY_TO` | `krystian.cwik@thecontrolsystem.biz` |
 | `OWNER_EMAIL` | `krystian.cwik@thecontrolsystem.biz` |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile |
-| `CALENDLY_SCHEDULING_URL` | `https://calendly.com/krystiancwik-thecontrolsystem/30min` |
+| `CALENDLY_SCHEDULING_URL` | `https://calendly.com/krystiancwik-thecontrolsystem/the-control-system` |
 | `CALENDLY_ACCESS_TOKEN` | Calendly → Personal Access Token |
 | `CALENDLY_ORGANIZATION_URI` | `https://api.calendly.com/organizations/24ec6e4a-9a75-4090-9fbe-b8e2f31eaaca` |
 | `CALENDLY_WEBHOOK_SIGNING_KEY` | powstaje przy tworzeniu webhooka (punkt 5) |
