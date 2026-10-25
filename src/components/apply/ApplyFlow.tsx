@@ -3,18 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { QUESTIONS, TOTAL_STEPS, type Answers, type QuestionId } from "@/lib/apply/questions";
-import { applyIntro, applyReview } from "@/content/apply";
+import { applyReview } from "@/content/apply";
 import { site } from "@/lib/site";
 import { track } from "@/lib/analytics";
 import { touchForSubmission } from "@/lib/analytics";
 
-type Phase = "intro" | "questions" | "review" | "sending";
+type Phase = "questions" | "review" | "sending";
 
 const FIELD =
   "w-full rounded-xl border border-tcs-border bg-tcs-surface px-4 py-3 text-[16px] text-tcs-text placeholder:text-tcs-text-muted/60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-tcs-blue";
 
 export function ApplyFlow() {
-  const [phase, setPhase] = useState<Phase>("intro");
+  // Poprawki 25.10.2026: bez ekranu startowego — CTA z landingu prowadzi
+  // od razu do pierwszego pytania.
+  const [phase, setPhase] = useState<Phase>("questions");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   // Pole "Coś innego" / "Inna sytuacja" — jedno per pytanie z revealsTextField,
@@ -32,7 +34,11 @@ export function ApplyFlow() {
   const question = QUESTIONS[index];
 
   /* --- Start: anonimowe application_id + zamrożenie źródła ruchu (T4) --- */
+  const started = useRef(false);
   const startApplication = useCallback(async () => {
+    // Strażnik przed podwójnym wywołaniem efektu (React Strict Mode w dev).
+    if (started.current) return;
+    started.current = true;
     idempotencyKey.current = crypto.randomUUID();
     track("application_start");
     try {
@@ -48,8 +54,11 @@ export function ApplyFlow() {
     } catch {
       // Brak draftu nie może zablokować wypełniania — zapis ponowimy przy submit.
     }
-    setPhase("questions");
   }, []);
+
+  useEffect(() => {
+    void startApplication();
+  }, [startApplication]);
 
   /* --- Focus na nagłówku kolejnego pytania (T3) --- */
   useEffect(() => {
@@ -129,7 +138,8 @@ export function ApplyFlow() {
 
   const back = () => {
     setError(null);
-    if (index === 0) setPhase("intro");
+    // Na pierwszym pytaniu „Wróć" prowadzi z powrotem na landing.
+    if (index === 0) window.location.assign(site.routes.home);
     else setIndex((i) => i - 1);
   };
 
@@ -180,30 +190,6 @@ export function ApplyFlow() {
   };
 
   /* ------------------------------------------------------------------ */
-
-  if (phase === "intro") {
-    return (
-      <div className="mx-auto max-w-[640px] px-4 py-16 sm:px-8 sm:py-24">
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-xs">
-          {applyIntro.eyebrow}
-        </p>
-        <h1 className="mt-4 text-[28px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[38px]">
-          {applyIntro.headline}
-        </h1>
-        <p className="mt-5 text-[16px] leading-relaxed text-tcs-text-muted sm:text-[17px]">
-          {applyIntro.supporting}
-        </p>
-        <button
-          type="button"
-          onClick={startApplication}
-          className="mt-9 inline-flex min-h-[56px] w-full items-center justify-center rounded-[14px] bg-tcs-gold px-6 text-[14px] font-bold tracking-[0.04em] text-[#07090C] transition-colors hover:bg-tcs-gold-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-tcs-blue focus-visible:ring-offset-[3px] focus-visible:ring-offset-tcs-bg sm:w-auto sm:min-w-[280px] sm:text-[15px]"
-        >
-          {applyIntro.cta}
-        </button>
-        <p className="mt-6 text-[13px] leading-relaxed text-tcs-text-muted">{applyIntro.microcopy}</p>
-      </div>
-    );
-  }
 
   if (phase === "review" || phase === "sending") {
     const summary = QUESTIONS.filter(

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Step1Section } from "@/components/landing/Step1Section";
-import { Step2Section } from "@/components/landing/Step2Section";
 import { ProofSection } from "@/components/landing/ProofSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 import { Footer } from "@/components/landing/Footer";
@@ -25,10 +24,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Landing page — sześć sekcji wg sekcji J briefu wdrożeniowego v1.0.
+ * Landing page — pięć sekcji wg sekcji J briefu wdrożeniowego v1.0.
  *
- * 1 Hero (K) · 2 Krok 1 / VSL (L+M) · 3 Krok 2 (N+O)
- * 4 Dowód (P+Q) · 5 Finalne CTA (R) · 6 Footer (S)
+ * 1 Hero (K) · 2 VSL (L+M) · 3 Dowód (P+Q) · 4 Finalne CTA (R) · 5 Footer (S)
+ * Sekcja „Krok 2" z CTA po VSL usunięta w poprawkach z 25.10.2026.
  *
  * Czego tu celowo NIE MA (sekcja A2 — decyzje zamrożone):
  * ceny, checkoutu, newslettera, lead magnetu, sociali, publicznego Calendly,
@@ -42,7 +41,6 @@ export default function LandingPage() {
       <main id="main">
         <Hero />
         <Step1Section />
-        <Step2Section />
         <ProofSection />
         <FinalCtaSection />
       </main>

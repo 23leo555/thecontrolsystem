@@ -7,6 +7,8 @@ export type CtaPlacement = "after_vsl" | "after_case_studies" | "vsl_complete";
 
 interface CtaButtonProps {
   placement: CtaPlacement;
+  /** Napis na przycisku — domyślnie wspólny `CTA_LABEL`. */
+  label?: string;
   className?: string;
 }
 
@@ -20,7 +22,7 @@ interface CtaButtonProps {
  * Cały element jest JEDNYM semantycznym linkiem — bez zagnieżdżonych
  * elementów interaktywnych (wymóg O2, istotne dla czytników ekranu).
  */
-export function CtaButton({ placement, className = "" }: CtaButtonProps) {
+export function CtaButton({ placement, label = CTA_LABEL, className = "" }: CtaButtonProps) {
   // Parametr scoringowy NIE może trafić do URL (O1) — przekazujemy wyłącznie miejsce osadzenia.
   const href = `${site.routes.apply}?cta_placement=${placement}`;
 
@@ -40,7 +42,7 @@ export function CtaButton({ placement, className = "" }: CtaButtonProps) {
         className,
       ].join(" ")}
     >
-      {CTA_LABEL}
+      {label}
     </Link>
   );
 }
