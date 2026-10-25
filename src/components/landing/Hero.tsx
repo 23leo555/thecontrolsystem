@@ -43,7 +43,15 @@ export function Hero() {
             {hero.headline}
           </h1>
 
-          <p className="mt-6 max-w-[54ch] text-[17px] leading-relaxed text-tcs-text-muted sm:text-[19px] lg:max-w-[88ch]">
+          <p className="mt-5 text-[19px] font-bold leading-snug text-tcs-gold sm:text-[24px] lg:text-[28px]">
+            {hero.subheadline}
+          </p>
+
+          <p className="mt-6 max-w-[62ch] text-[17px] font-semibold leading-relaxed text-tcs-text sm:text-[19px] lg:max-w-[80ch]">
+            {hero.lead}
+          </p>
+
+          <p className="mt-4 max-w-[62ch] text-[16px] leading-relaxed text-tcs-text-muted sm:text-[17px] lg:max-w-[88ch]">
             {hero.supporting}
           </p>
         </div>
