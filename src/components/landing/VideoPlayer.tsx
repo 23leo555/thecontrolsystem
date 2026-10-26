@@ -130,7 +130,7 @@ export function VideoPlayer() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-[1120px]">
+    <div className="mx-auto w-full max-w-[900px]">
       <div
         ref={wrapperRef}
         className={[
