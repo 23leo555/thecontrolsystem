@@ -8,7 +8,7 @@ import { CtaButton } from "./CtaButton";
 export function FinalCtaSection() {
   return (
     <section id="pierwszy-krok" className="pb-12 pt-4 sm:pb-16 sm:pt-6">
-      <div className="mx-auto max-w-[1440px] px-4 text-center sm:px-8">
+      <div className="mx-auto max-w-[1600px] px-3 text-center sm:px-6">
         <div className="mx-auto mb-5 h-px w-12 bg-tcs-gold" />
 
         <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">

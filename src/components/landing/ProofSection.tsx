@@ -12,7 +12,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
     data.image.widths.map((w) => `${data.image.base}-${w}.${ext} ${w}w`).join(", ");
 
   return (
-    <article className="rounded-[18px] border border-tcs-border/70 bg-tcs-bg/75 p-5 backdrop-blur-sm sm:p-7">
+    <article className="rounded-[18px] border border-tcs-border/70 bg-tcs-bg/75 p-4 backdrop-blur-sm sm:p-6">
       {/* Imię i nagłówek na całą szerokość karty, nad zdjęciem (poprawki 26.10.2026). */}
       <header className="mb-5">
         <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
@@ -30,11 +30,11 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
         ].join(" ")}
       >
         {/* --- Zdjęcie: wąska kolumna, na mobile ograniczona szerokość --- */}
-        <figure className="mx-auto w-full max-w-[300px] md:mx-0 md:w-[26%] md:max-w-none md:shrink-0">
+        <figure className="mx-auto w-full max-w-[300px] md:mx-0 md:w-[22%] md:max-w-none md:shrink-0">
           <div className="relative overflow-hidden rounded-[12px] border border-tcs-border bg-tcs-surface">
             <picture>
-              <source type="image/avif" srcSet={srcSet("avif")} sizes="(min-width: 768px) 26vw, 300px" />
-              <source type="image/webp" srcSet={srcSet("webp")} sizes="(min-width: 768px) 26vw, 300px" />
+              <source type="image/avif" srcSet={srcSet("avif")} sizes="(min-width: 768px) 22vw, 300px" />
+              <source type="image/webp" srcSet={srcSet("webp")} sizes="(min-width: 768px) 22vw, 300px" />
               <img
                 src={`${data.image.base}.jpg`}
                 alt={data.image.alt}
@@ -84,7 +84,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
 
           <p className="mt-2 text-[11px] leading-relaxed text-tcs-text-muted">{proof.metricsNote}</p>
 
-          <div className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+          <div className="mt-5 space-y-3">
             {[
               { label: "Punkt startowy", text: data.start },
               { label: "Przeszkoda", text: data.obstacle },
@@ -109,7 +109,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
 export function ProofSection() {
   return (
     <section id="dowod" className="py-10 sm:py-14">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-8">
+      <div className="mx-auto max-w-[1600px] px-3 sm:px-6">
         <div className="mx-auto mb-6 text-center sm:mb-8">
           <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
             {proof.eyebrow}

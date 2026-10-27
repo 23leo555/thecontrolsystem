@@ -11,7 +11,7 @@ import { site } from "@/lib/site";
 export function Header() {
   return (
     <header className="relative z-20 border-b border-tcs-border/60 bg-tcs-bg/60 backdrop-blur-sm">
-      <div className="mx-auto grid h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-3 px-4 sm:h-20 sm:px-8 md:h-24 md:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto grid h-16 max-w-[1600px] grid-cols-[auto_1fr] items-center gap-3 px-4 sm:h-20 sm:px-6 md:h-24 md:grid-cols-[1fr_auto_1fr]">
         <div className="hidden md:block" />
 
         <Link

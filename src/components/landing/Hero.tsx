@@ -10,7 +10,7 @@ import { hero } from "@/content/landing";
 export function Hero() {
   return (
     <section className="relative">
-      <div className="mx-auto max-w-[1440px] px-4 pb-6 pt-10 text-center sm:px-8 sm:pb-8 sm:pt-14 lg:pt-16">
+      <div className="mx-auto max-w-[1600px] px-3 pb-6 pt-10 text-center sm:px-6 sm:pb-8 sm:pt-14 lg:pt-16">
         <p className="text-[10px] font-semibold uppercase leading-relaxed tracking-[0.18em] text-tcs-gold sm:text-[11px]">
           {hero.eyebrow}
         </p>
