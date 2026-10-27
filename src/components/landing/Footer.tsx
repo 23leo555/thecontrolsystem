@@ -27,9 +27,9 @@ const legalLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-tcs-border bg-tcs-bg">
-      <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-8 sm:py-16">
-        <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+    <footer className="border-t border-tcs-border bg-tcs-bg/85 backdrop-blur-sm">
+      <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
               <img src="/brand/tcs-logo.webp" alt="" width={32} height={32} className="h-8 w-8" />
@@ -62,11 +62,11 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-10 space-y-3 border-t border-tcs-border pt-8">
-          <p className="max-w-[85ch] text-[13px] leading-relaxed text-tcs-text-muted">
+        <div className="mt-6 space-y-2 border-t border-tcs-border pt-5">
+          <p className="max-w-[85ch] text-[12px] leading-relaxed text-tcs-text-muted">
             {footer.resultsDisclaimer}
           </p>
-          <p className="max-w-[85ch] text-[13px] leading-relaxed text-tcs-text-muted">
+          <p className="max-w-[85ch] text-[12px] leading-relaxed text-tcs-text-muted">
             {footer.healthDisclaimer}
           </p>
           <p className="pt-2 text-[13px] text-tcs-text-muted">

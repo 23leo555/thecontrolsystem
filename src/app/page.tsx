@@ -6,6 +6,7 @@ import { ProofSection } from "@/components/landing/ProofSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 import { Footer } from "@/components/landing/Footer";
 import { PageViewTracker } from "@/components/landing/PageViewTracker";
+import { PageBackground } from "@/components/landing/PageBackground";
 
 /** Meta — finalne copy z sekcji AL2. Indeksacja wg AL1. */
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function LandingPage() {
   return (
     <>
       <PageViewTracker event="page_view_landing" />
+      <PageBackground />
       <Header />
       <main id="main">
         <Hero />
