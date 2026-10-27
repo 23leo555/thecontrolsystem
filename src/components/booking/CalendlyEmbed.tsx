@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Script from "next/script";
 import { track } from "@/lib/analytics";
+import { useCalendlyBooked } from "./useCalendlyBooked";
 
 /**
  * Osadzenie Calendly (sekcja 13).
@@ -20,6 +21,8 @@ export function CalendlyEmbed({
   email: string;
   applicationId: string;
 }) {
+  useCalendlyBooked(applicationId);
+
   useEffect(() => {
     track("calendar_view", { application_id: applicationId });
   }, [applicationId]);

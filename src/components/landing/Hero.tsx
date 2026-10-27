@@ -21,7 +21,8 @@ export function Hero() {
         </h1>
 
         <p className="mt-3 text-[15px] font-bold leading-snug text-tcs-gold sm:text-[20px]">
-          {hero.subheadline}
+          {hero.subheadline[0]} <br className="sm:hidden" />
+          {hero.subheadline[1]}
         </p>
 
         <p className="mx-auto mt-5 text-[14px] font-semibold leading-relaxed text-tcs-text sm:text-[16px]">
@@ -29,7 +30,9 @@ export function Hero() {
         </p>
 
         <p className="mx-auto mt-3 text-[13px] leading-relaxed text-tcs-text-muted sm:text-[15px]">
-          {hero.supporting}
+          {hero.supporting[0]} <br className="hidden lg:inline" />
+          {hero.supporting[1]} <br className="hidden lg:inline" />
+          {hero.supporting[2]}
         </p>
       </div>
     </section>

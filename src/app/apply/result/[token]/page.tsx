@@ -3,6 +3,8 @@ import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase";
 import { verifyResultToken } from "@/lib/apply/resultToken";
 import { site } from "@/lib/site";
+import { CalendlyFrame } from "@/components/booking/CalendlyFrame";
+import { PageBackground } from "@/components/landing/PageBackground";
 import {
   resultQualified,
   resultManualReview,
@@ -68,11 +70,12 @@ function ProtocolOffer({ headline = resultProtocolOffer.headline }: { headline?:
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-tcs-bg">
-      <header className="border-b border-tcs-border/60">
-        <div className="mx-auto flex h-16 max-w-[720px] items-center px-4 sm:px-8">
+    <div className="min-h-screen">
+      <PageBackground />
+      <header className="border-b border-tcs-border/60 bg-tcs-bg/60 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-[720px] items-center justify-center px-4 sm:px-8">
           <Link href={site.routes.home} aria-label={site.name} className="inline-flex">
-            <img src="/brand/tcs-logo.webp" alt="" width={44} height={44} className="h-11 w-11" />
+            <img src="/brand/tcs-logo-poziome.webp" alt="" width={720} height={264} className="h-11 w-auto" />
           </Link>
         </div>
       </header>
@@ -124,12 +127,8 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
         {calendlyUrl ? (
           // Embed inline, nie popup (AA1). URL pochodzi z sekretu środowiskowego
           // i nigdy nie trafia do bundla klienta ani do landing page.
-          <iframe
-            src={calendlyUrl}
-            title="Wybór terminu rozmowy"
-            className="mt-6 h-[720px] w-full rounded-[14px] border border-tcs-border bg-tcs-surface"
-            loading="lazy"
-          />
+          // Po rezerwacji CalendlyFrame przenosi na /rozmowa/dziekuje.
+          <CalendlyFrame schedulingUrl={calendlyUrl} />
         ) : (
           <p className="mt-6 rounded-[14px] border border-tcs-border bg-tcs-surface p-5 text-[15px] text-tcs-text-muted">
             Kalendarz nie jest jeszcze skonfigurowany. Skontaktujemy się z Tobą e-mailem, żeby
@@ -140,9 +139,6 @@ export default async function ResultPage({ params }: { params: Promise<{ token: 
         <p className="mt-6 text-[13px] leading-relaxed text-tcs-text-muted">
           {resultQualified.microcopy}
         </p>
-
-        {/* Pod kalendarzem, nie nad nim: rezerwacja terminu zostaje pierwszym krokiem. */}
-        <ProtocolOffer headline={resultProtocolOffer.headlineQualified} />
       </Shell>
     );
   }
