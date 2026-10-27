@@ -9,7 +9,7 @@ import { site } from "@/lib/site";
 export function Header() {
   return (
     <header className="relative z-20 border-b border-tcs-border/60 bg-tcs-bg/60 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-center px-4 sm:h-16 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-center px-4 sm:h-16 sm:px-8">
         <Link
           href={site.routes.home}
           className="flex items-center gap-3 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tcs-blue focus-visible:ring-offset-2 focus-visible:ring-offset-tcs-bg"

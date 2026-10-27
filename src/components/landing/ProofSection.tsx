@@ -30,11 +30,11 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
         ].join(" ")}
       >
         {/* --- Zdjęcie: wąska kolumna, na mobile ograniczona szerokość --- */}
-        <figure className="mx-auto w-full max-w-[300px] md:mx-0 md:w-[30%] md:max-w-none md:shrink-0">
+        <figure className="mx-auto w-full max-w-[300px] md:mx-0 md:w-[26%] md:max-w-none md:shrink-0">
           <div className="relative overflow-hidden rounded-[12px] border border-tcs-border bg-tcs-surface">
             <picture>
-              <source type="image/avif" srcSet={srcSet("avif")} sizes="(min-width: 768px) 30vw, 300px" />
-              <source type="image/webp" srcSet={srcSet("webp")} sizes="(min-width: 768px) 30vw, 300px" />
+              <source type="image/avif" srcSet={srcSet("avif")} sizes="(min-width: 768px) 26vw, 300px" />
+              <source type="image/webp" srcSet={srcSet("webp")} sizes="(min-width: 768px) 26vw, 300px" />
               <img
                 src={`${data.image.base}.jpg`}
                 alt={data.image.alt}
@@ -109,7 +109,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
 export function ProofSection() {
   return (
     <section id="dowod" className="py-10 sm:py-14">
-      <div className="mx-auto max-w-[1100px] px-4 sm:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-8">
         <div className="mx-auto mb-6 text-center sm:mb-8">
           <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
             {proof.eyebrow}
