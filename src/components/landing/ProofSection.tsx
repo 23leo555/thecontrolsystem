@@ -18,7 +18,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
         <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
           {data.eyebrow}
         </p>
-        <h3 className="mt-2 text-[20px] font-bold leading-snug tracking-[-0.015em] text-tcs-text sm:text-[26px]">
+        <h3 className="mt-2 text-[17px] font-bold leading-snug tracking-[-0.015em] text-tcs-text sm:text-[26px]">
           {data.headline}
         </h3>
       </header>
@@ -62,7 +62,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
 
         {/* --- Treść --- */}
         <div className="min-w-0 flex-1">
-          <p className="text-[14px] leading-relaxed text-tcs-text sm:text-[15px]">
+          <p className="text-[13px] leading-relaxed text-tcs-text sm:text-[15px]">
             {data.transformation}
           </p>
 
@@ -71,7 +71,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
               <div key={m.label} className="bg-tcs-surface px-3 py-3 text-center">
                 <dt className="sr-only">{m.label}</dt>
                 <dd>
-                  <span className="block text-[19px] font-extrabold tracking-[-0.02em] text-tcs-gold sm:text-[21px]">
+                  <span className="block text-[17px] font-extrabold tracking-[-0.02em] text-tcs-gold sm:text-[21px]">
                     {m.value}
                   </span>
                   <span className="mt-0.5 block text-[11px] text-tcs-text-muted sm:text-[12px]">
@@ -95,7 +95,7 @@ function CaseStudyModule({ data, flip }: { data: CaseStudy; flip?: boolean }) {
                 <h4 className="text-[10px] font-bold tracking-[0.16em] text-tcs-gold/90 sm:text-[11px]">
                   {block.label.toUpperCase()}
                 </h4>
-                <p className="mt-1 text-[14px] leading-relaxed text-tcs-text-muted">{block.text}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-tcs-text-muted sm:text-[14px]">{block.text}</p>
               </div>
             ))}
           </div>
@@ -114,10 +114,10 @@ export function ProofSection() {
           <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
             {proof.eyebrow}
           </p>
-          <h2 className="mt-3 text-[22px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
+          <h2 className="mt-3 text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
             {proof.headline}
           </h2>
-          <p className="mx-auto mt-3 text-[14px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
+          <p className="mx-auto mt-3 text-[13px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
             {proof.supporting}
           </p>
         </div>

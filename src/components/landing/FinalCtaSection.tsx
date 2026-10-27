@@ -14,10 +14,10 @@ export function FinalCtaSection() {
         <p className="text-[10px] font-semibold tracking-[0.18em] text-tcs-gold sm:text-[11px]">
           {finalCta.eyebrow}
         </p>
-        <h2 className="mt-3 text-[22px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
+        <h2 className="mt-3 text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
           {finalCta.headline}
         </h2>
-        <p className="mx-auto mt-3 text-[14px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
+        <p className="mx-auto mt-3 text-[13px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
           {finalCta.supporting}
         </p>
 

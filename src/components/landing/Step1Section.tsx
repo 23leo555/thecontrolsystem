@@ -12,10 +12,10 @@ export function Step1Section() {
     <section id="krok-1" className="py-8 sm:py-10">
       <div className="mx-auto max-w-[1600px] px-3 sm:px-6">
         <div className="mx-auto mb-6 text-center sm:mb-8">
-          <h2 className="text-[22px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
+          <h2 className="text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-tcs-text sm:text-[28px] lg:text-[32px]">
             {step1.headline}
           </h2>
-          <p className="mx-auto mt-3 text-[14px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
+          <p className="mx-auto mt-3 text-[13px] leading-relaxed text-tcs-text-muted sm:text-[16px]">
             {step1.supporting}
           </p>
         </div>
