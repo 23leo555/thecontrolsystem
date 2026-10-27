@@ -3,7 +3,7 @@ import { CTA_LABEL } from "@/content/landing";
 import { site } from "@/lib/site";
 
 /** Miejsce osadzenia CTA — trafia do eventu i parametru URL (sekcja O1). */
-export type CtaPlacement = "after_vsl" | "after_case_studies" | "vsl_complete";
+export type CtaPlacement = "header" | "after_vsl" | "after_case_studies" | "vsl_complete";
 
 interface CtaButtonProps {
   placement: CtaPlacement;
