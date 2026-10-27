@@ -97,6 +97,8 @@ export const site = {
     resetThanks: "/reset/dziekuje",
     application: "/aplikacja",
     call: "/rozmowa",
+    /** Strona podziękowania po rezerwacji terminu w Calendly. */
+    callThanks: "/rozmowa/dziekuje",
     privacy: "/polityka-prywatnosci",
     cookies: "/cookies",
     terms: "/regulamin",

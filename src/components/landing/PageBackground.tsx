@@ -14,11 +14,11 @@ export function PageBackground() {
         <img
           src="/brand/tlo-mobile.webp"
           alt=""
-          className="h-full w-full object-cover opacity-[0.28] md:opacity-[0.32]"
+          className="h-full w-full object-cover opacity-[0.34] md:opacity-[0.42]"
         />
       </picture>
       {/* Winieta: środek ekranu ciemniejszy, żeby tekst nie walczył z mózgiem. */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(5,8,12,0.72)_0%,rgba(5,8,12,0.35)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(5,8,12,0.62)_0%,rgba(5,8,12,0.25)_100%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-tcs-bg/40 via-transparent to-tcs-bg/70" />
     </div>
   );

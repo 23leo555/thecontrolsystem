@@ -26,11 +26,16 @@ export const hero = {
   eyebrow: "DLA ZAPRACOWANYCH MĘŻCZYZN 30+, KTÓRZY FUNKCJONUJĄ ZAWODOWO NA WYSOKIM POZIOMIE",
   /** Poprawki 25.10.2026 — nowe hero. */
   headline: "Bądź w formie nie tylko zawodowo.",
-  subheadline: "Nie odkładaj własnego życia na czas, kiedy pracy będzie mniej.",
+  /** Dwie części — na telefonie każda w osobnej linii. */
+  subheadline: ["Nie odkładaj własnego życia na czas,", "kiedy pracy będzie mniej."],
   lead:
     "Więcej energii od rana, lepsza forma i siła na to, co ważne także poza pracą — to cele, nad którymi możesz pracować w RESET 90.",
-  supporting:
-    "90 dni indywidualnego mentoringu 1:1 dla przedsiębiorców i menedżerów. Wspólnie ustalamy priorytety, dopasowujemy działania do Twojego rzeczywistego kalendarza i co tydzień korygujemy je na podstawie postępów — również wtedy, gdy pojawiają się wyjazdy lub wyjątkowo napięte tygodnie.",
+  /** Trzy części — na komputerze każda w osobnej linii. */
+  supporting: [
+    "90 dni indywidualnego mentoringu 1:1 dla przedsiębiorców i menedżerów.",
+    "Wspólnie ustalamy priorytety, dopasowujemy działania do Twojego rzeczywistego kalendarza i co tydzień korygujemy je",
+    "na podstawie postępów — również wtedy, gdy pojawiają się wyjazdy lub wyjątkowo napięte tygodnie.",
+  ],
 } as const;
 
 /**

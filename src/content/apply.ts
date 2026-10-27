@@ -39,9 +39,16 @@ export const resultQualified = {
 
 /** Sekcja X3 — po rezerwacji terminu. Świadomie bez kolejnej sprzedaży. */
 export const resultBooked = {
+  eyebrow: "ROZMOWA UMÓWIONA",
   headline: "Termin został zarezerwowany.",
   supporting:
     "Szczegóły spotkania otrzymasz e-mailem. Przygotuj informację o swoim głównym celu na pierwsze 90 dni i największej przeszkodzie, która dotąd rozbijała regularność.",
+  steps: [
+    "Sprawdź skrzynkę — potwierdzenie z terminem i linkiem do rozmowy online przyszło e-mailem. Jeśli go nie widzisz, zajrzyj do spamu lub ofert.",
+    "Zarezerwuj spokojne miejsce i czas, w którym nikt Ci nie przeszkodzi.",
+    "Jeśli termin przestanie Ci pasować, zmienisz go linkiem z wiadomości potwierdzającej.",
+  ],
+  signature: "Do usłyszenia — Krystian Ćwik",
 } as const;
 
 /**
