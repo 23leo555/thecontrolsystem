@@ -35,6 +35,11 @@ export function Hero() {
           {hero.supporting[2]}
         </p>
       </div>
+
+      {/* Subtelna przerywana linia oddzielająca hero od sekcji z filmem. */}
+      <div aria-hidden className="mx-auto max-w-[1600px] px-3 sm:px-6">
+        <div className="border-t border-dashed border-tcs-gold/25" />
+      </div>
     </section>
   );
 }
